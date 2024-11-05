@@ -72,7 +72,7 @@ jobs:
         TARGET_REPO: "${{ steps.issue_body.outputs.target_repo }}"
         SOURCE_TOKEN: "${{ secrets.SOURCE_TOKEN }}"
         TARGET_TOKEN: "${{ secrets.TARGET_TOKEN }}"
-            run: |
+      run: |
         # Define PowerShell variables from environment variables
         $sourceOrg = '${{ env.SOURCE_ORG }}'
         $sourceRepo = '${{ env.SOURCE_REPO }}'
