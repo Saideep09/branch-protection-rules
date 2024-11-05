@@ -72,7 +72,7 @@ jobs:
         TARGET_REPO: "${{ steps.issue_body.outputs.target_repo }}"
         SOURCE_TOKEN: "${{ secrets.SOURCE_TOKEN }}"
         TARGET_TOKEN: "${{ secrets.TARGET_TOKEN }}"
-      run: |
+            run: |
         # Define PowerShell variables from environment variables
         $sourceOrg = '${{ env.SOURCE_ORG }}'
         $sourceRepo = '${{ env.SOURCE_REPO }}'
@@ -95,30 +95,30 @@ jobs:
         }
 
         # Get all branches from the source repository
-        $allBranches = (Invoke-RestMethod -Uri \"https://api.github.com/repos/$sourceOrg/$sourceRepo/branches\" -Headers $sourceHeaders).name
-        Write-Output \"All branches in source repository: $($allBranches -join ', ')\"
+        $allBranches = (Invoke-RestMethod -Uri "https://api.github.com/repos/$sourceOrg/$sourceRepo/branches" -Headers $sourceHeaders).name
+        Write-Output "All branches in source repository: $($allBranches -join ', ')"
 
         $protectedBranches = @()
 
         # Identify protected branches
         foreach ($branch in $allBranches) {
-            Write-Output \"Checking protection status for branch: $branch\"
+            Write-Output "Checking protection status for branch: $branch"
             try {
-                $sourceProtectionUri = \"https://api.github.com/repos/$sourceOrg/$sourceRepo/branches/$branch/protection\"
+                $sourceProtectionUri = "https://api.github.com/repos/$sourceOrg/$sourceRepo/branches/$branch/protection"
                 $sourceProtection = Invoke-RestMethod -Uri $sourceProtectionUri -Headers $sourceHeaders -Method Get
                 $protectedBranches += $branch
-                Write-Output \"Branch $branch is protected.\"
+                Write-Output "Branch $branch is protected."
             } catch {
-                Write-Output \"Branch $branch is not protected or an error occurred.\"
+                Write-Output "Branch $branch is not protected or an error occurred."
             }
         }
 
-        Write-Output \"Protected branches: $($protectedBranches -join ', ')\"
+        Write-Output "Protected branches: $($protectedBranches -join ', ')"
 
         # Migrate protection rules for protected branches
         foreach ($branch in $protectedBranches) {
-            Write-Output \"Migrating protection rules for branch: $branch\"
-            $sourceProtectionUri = \"https://api.github.com/repos/$sourceOrg/$sourceRepo/branches/$branch/protection\"
+            Write-Output "Migrating protection rules for branch: $branch"
+            $sourceProtectionUri = "https://api.github.com/repos/$sourceOrg/$sourceRepo/branches/$branch/protection"
             $sourceProtection = Invoke-RestMethod -Uri $sourceProtectionUri -Headers $sourceHeaders -Method Get
 
             $body = @{
@@ -154,8 +154,8 @@ jobs:
                 } else { $null }
             } | ConvertTo-Json -Depth 10
 
-            $targetProtectionUri = \"https://api.github.com/repos/$targetOrg/$targetRepo/branches/$branch/protection\"
+            $targetProtectionUri = "https://api.github.com/repos/$targetOrg/$targetRepo/branches/$branch/protection"
             Invoke-RestMethod -Uri $targetProtectionUri -Headers $targetHeaders -Method Put -Body $body
 
-            Write-Output \"Branch protection rules applied to $branch in target repository.\"
+            Write-Output "Branch protection rules applied to $branch in target repository."
         }
