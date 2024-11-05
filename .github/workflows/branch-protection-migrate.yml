@@ -62,4 +62,20 @@ jobs:
         echo "Source Repository: ${{ steps.issue_body.outputs.source_repo }}"
         echo "Target Organization: ${{ steps.issue_body.outputs.target_org }}"
         echo "Target Repository: ${{ steps.issue_body.outputs.target_repo }}"
+        
+    - name: Extract Branches from Source Repository
+      id: extract_branches
+      run: |
+        echo "Authenticating with GitHub CLI..."
+        echo "$SOURCE_TOKEN" | gh auth login --with-token
+
+        # Get all branches from the source repository
+        branches=$(gh api -X GET "repos/$SOURCE_ORG/$SOURCE_REPO/branches" --jq '.[] | .name')
+        echo "Branches in the source repository:"
+        echo "$branches"
+
+        # Save branches to environment variable for further steps
+        echo "branches=$branches" >> $GITHUB_ENV
+
+      shell: bash
 
