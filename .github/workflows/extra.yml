@@ -106,7 +106,7 @@ jobs:
     - name: Move Generated Workflows
       run: |
         mkdir -p .github/workflows
-        mv "tmp/dry-run/pipelines/Payment_Services/Payment_Diversity_[CNP]/MGMResorts.pd-payments-audit-trail/.github/workflows/*" .github/workflows/
+        mv "tmp/dry-run/pipelines/Payment_Services/Payment_Diversity_[CNP]/MGMResorts.pd-payments-audit-trail/.github/workflows"/* .github/workflows/
 
     # Step 11: Commit and Push Migrated Workflows
     - name: Commit and Push Migrated Workflows
