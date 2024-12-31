@@ -27,13 +27,12 @@ jobs:
       run: |
         gh extension install github/gh-actions-importer
 
-    - name: Configure Actions Importer
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        AZURE_DEVOPS_ORG: ${{ secrets.AZURE_DEVOPS_ORG }}
-        AZURE_DEVOPS_TOKEN: ${{ secrets.AZURE_DEVOPS_TOKEN }}
+    - name: Set Up Configuration Manually
       run: |
-        gh actions-importer configure
+        mkdir -p ~/.gh-actions-importer
+        echo "azure-devops:" > ~/.gh-actions-importer/config.yml
+        echo "  org: ${{ secrets.AZURE_DEVOPS_ORG }}" >> ~/.gh-actions-importer/config.yml
+        echo "  token: ${{ secrets.AZURE_DEVOPS_TOKEN }}" >> ~/.gh-actions-importer/config.yml
 
     - name: Dry Run Migration
       env:
