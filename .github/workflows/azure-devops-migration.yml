@@ -105,12 +105,12 @@ jobs:
         find tmp/dry-run
 
     # Step 11: Commit and Push Migrated Workflows (if dry run is successful)
-    - name: Commit Migrated Workflows
-      if: success()  # Only run if the previous steps succeeded
+    - name: Move Generated Workflows
       run: |
-        mv tmp/dry-run/.github/workflows/* .github/workflows/
+        mv tmp/dry-run/pipelines/Payment_Services/Payment_Diversity_[CNP]/MGMResorts.pd-payments-audit-trail/.github/workflows/* .github/workflows/
         git config --global user.name "GitHub Actions"
         git config --global user.email "actions@github.com"
         git add .github/workflows/
         git commit -m "Add migrated Azure DevOps pipeline workflows"
         git push origin main
+
