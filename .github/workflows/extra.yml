@@ -2,12 +2,7 @@ name: extra
 
 on:
   workflow_dispatch:
-    inputs:
-      pipeline-id:
-        description: "Azure DevOps Pipeline ID to migrate"
-        required: true
-        type: string
-
+     
 permissions:
   contents: write
   actions: write
@@ -82,7 +77,7 @@ jobs:
       run: |
         mkdir -p tmp/dry-run
         gh actions-importer dry-run azure-devops pipeline \
-        --pipeline-id "${{ github.event.inputs.pipeline-id }}" \
+        --pipeline-id "1636" \
         --azure-devops-organization "MGMResortsDigitalEngineering" \
         --azure-devops-project "Payment Services" \
         --azure-devops-access-token "${{ secrets.AZURE_DEVOPS_TOKEN }}" \
