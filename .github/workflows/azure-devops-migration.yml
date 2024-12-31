@@ -74,7 +74,7 @@ jobs:
         AZURE_DEVOPS_PROJECT: "Payment Services"
         AZURE_DEVOPS_TOKEN: "3nHiHFukAmzrvwWBMkD1OzDudZxqW0FKP3G2dvVqMfTnnSUZL1F7JQQJ99ALACAAAAAT72ceAAASAZDOMlOv"
       run: |
-        mkdir -p tmp/dry-run
+        mkdir -p /tmp/dry-run
         gh actions-importer dry-run azure-devops pipeline \
           --pipeline-id "1636" \
           --azure-devops-organization "MGMResortsDigitalEngineering" \
@@ -83,7 +83,7 @@ jobs:
           --github-access-token "${{ secrets.PAT_TOKEN }}" \
           --output-dir /tmp/dry-run \
           --no-telemetry  # Disable telemetry to avoid related errors
-        cat tmp/dry-run/log/*  # Debugging log
+        cat /tmp/dry-run/log/*  # Debugging log
 
     # Step 9: Upload Dry Run Results
     - name: Upload Dry Run Results
