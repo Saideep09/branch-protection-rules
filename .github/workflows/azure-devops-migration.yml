@@ -40,7 +40,7 @@ jobs:
     - name: Validate Azure DevOps PAT
       env:
         AZURE_DEVOPS_TOKEN: ${{ secrets.AZURE_DEVOPS_TOKEN }}
-        AZURE_DEVOPS_ORG: ${{ secrets.AZURE_DEVOPS_ORG }}
+        AZURE_DEVOPS_ORG: ${{ env.AZURE_DEVOPS_ORG }}
       run: |
         echo "Validating Azure DevOps PAT..."
         response=$(curl -s -o /dev/null -w "%{http_code}" -u ":${AZURE_DEVOPS_TOKEN}" \
@@ -58,27 +58,27 @@ jobs:
       run: |
         mkdir -p ~/.gh-actions-importer
         echo "azure-devops:" > ~/.gh-actions-importer/config.yml
-        echo "  org: ${{ secrets.AZURE_DEVOPS_ORG }}" >> ~/.gh-actions-importer/config.yml
+        echo "  org: ${{ env.AZURE_DEVOPS_ORG }}" >> ~/.gh-actions-importer/config.yml
         echo "  token: ${{ secrets.AZURE_DEVOPS_TOKEN }}" >> ~/.gh-actions-importer/config.yml
 
     # Step 6: Validate Azure DevOps Credentials
     - name: Validate Azure DevOps Credentials
       run: |
-        curl -u :${{ secrets.AZURE_DEVOPS_TOKEN }} https://dev.azure.com/${{ secrets.AZURE_DEVOPS_ORG }} | echo "Azure DevOps credentials validated."
+        curl -u :${{ secrets.AZURE_DEVOPS_TOKEN }} https://dev.azure.com/${{ env.AZURE_DEVOPS_ORG }} | echo "Azure DevOps credentials validated."
 
     # Step 7: Dry Run Migration
     - name: Dry Run Migration
       env:
         GH_TOKEN: ${{ secrets.PAT_TOKEN }}
-        AZURE_DEVOPS_ORG: ${{ secrets.AZURE_DEVOPS_ORG }}
-        AZURE_DEVOPS_PROJECT: ${{ secrets.AZURE_DEVOPS_PROJECT }}
+        AZURE_DEVOPS_ORG: ${{ env.AZURE_DEVOPS_ORG }}
+        AZURE_DEVOPS_PROJECT: ${{ env.AZURE_DEVOPS_PROJECT }}
         AZURE_DEVOPS_TOKEN: ${{ secrets.AZURE_DEVOPS_TOKEN }}
       run: |
         mkdir -p tmp/dry-run
         gh actions-importer dry-run azure-devops pipeline \
           --pipeline-id "${{ github.event.inputs.pipeline-id }}" \
-          --azure-devops-organization "${{ secrets.AZURE_DEVOPS_ORG }}" \
-          --azure-devops-project "${{ secrets.AZURE_DEVOPS_PROJECT }}" \
+          --azure-devops-organization "${{ env.AZURE_DEVOPS_ORG }}" \
+          --azure-devops-project "${{ env.AZURE_DEVOPS_PROJECT }}" \
           --azure-devops-access-token "${{ secrets.AZURE_DEVOPS_TOKEN }}" \
           --github-access-token "${{ secrets.PAT_TOKN }}" \
           --output-dir tmp/dry-run \
