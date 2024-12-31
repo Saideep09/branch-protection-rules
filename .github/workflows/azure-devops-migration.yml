@@ -15,19 +15,12 @@ jobs:
     # Step 2: Set up GitHub CLI and install the extension
     - name: Install GitHub CLI and gh-actions-importer extension
       env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         sudo apt-get install gh
         gh extension install github/gh-actions-importer
 
-    # Step 3: Authenticate with GitHub CLI
-    - name: Authenticate with GitHub
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Explicitly pass the token to gh CLI
-      run: |
-        gh auth login --with-token <<< "${GH_TOKEN}"
-
-    # Step 4: Configure GitHub Actions Importer
+    # Step 3: Configure GitHub Actions Importer
     - name: Configure GitHub Actions Importer
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -36,7 +29,7 @@ jobs:
       run: |
         gh actions-importer configure
 
-    # Step 5: Perform dry-run migration
+    # Step 4: Perform dry-run migration
     - name: Dry-run migration
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -51,7 +44,7 @@ jobs:
           --azure-devops-project "${AZURE_DEVOPS_PROJECT}" \
           --output-dir tmp/dry-run
 
-    # Step 6: Commit migrated workflows (if dry-run is successful)
+    # Step 5: Commit migrated workflows (if dry-run is successful)
     - name: Commit migrated workflows
       if: success()
       run: |
