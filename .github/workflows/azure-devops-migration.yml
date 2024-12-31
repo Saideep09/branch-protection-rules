@@ -1,55 +1,74 @@
-name: Azure DevOps Migration Automation
+name: Migrate Azure DevOps to GitHub Actions
 
 on:
-  workflow_dispatch:
-    inputs:
-      pipeline-id:
-        description: "Azure DevOps Pipeline ID to migrate"
-        required: true
-        type: string
+  workflow_dispatch: # Allows for manual trigger
 
 jobs:
-  migrate-pipeline:
+  migrate:
     runs-on: ubuntu-latest
 
     steps:
+    # Step 1: Check out the repository
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Install GitHub CLI
+    # Step 2: Set up GitHub CLI and install extension
+    - name: Install GitHub CLI and gh-actions-importer extension
       run: |
-        sudo apt-get update
-        sudo apt-get install -y gh
-
-    - name: Install Actions Importer Extension
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
+        sudo apt-get install gh
         gh extension install github/gh-actions-importer
 
-    - name: Update Actions Importer Image
+    # Step 3: Set up authentication for GitHub CLI
+    - name: Authenticate with GitHub
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        gh actions-importer update
+        gh auth login --with-token <<< "${GH_TOKEN}"
 
-    - name: Set Up Configuration Manually
-      run: |
-        mkdir -p ~/.gh-actions-importer
-        echo "azure-devops:" > ~/.gh-actions-importer/config.yml
-        echo "  org: ${{ secrets.AZURE_DEVOPS_ORG }}" >> ~/.gh-actions-importer/config.yml
-        echo "  token: ${{ secrets.AZURE_DEVOPS_TOKEN }}" >> ~/.gh-actions-importer/config.yml
-
-    - name: Dry Run Migration
+    # Step 4: Configure the GitHub Actions Importer
+    - name: Configure GitHub Actions Importer
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        AZURE_DEVOPS_ORG: ${{ secrets.AZURE_DEVOPS_ORG }}
+        AZURE_DEVOPS_TOKEN: ${{ secrets.AZURE_DEVOPS_TOKEN }}
+      run: |
+        gh actions-importer configure
+
+    # Step 5: Perform a dry-run migration (without making changes to the repo)
+    - name: Dry-run migration from Azure DevOps to GitHub Actions
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        AZURE_DEVOPS_ORG: ${{ secrets.AZURE_DEVOPS_ORG }}
+        AZURE_DEVOPS_PROJECT: ${{ secrets.AZURE_DEVOPS_PROJECT }}
+        AZURE_DEVOPS_TOKEN: ${{ secrets.AZURE_DEVOPS_TOKEN }}
       run: |
         mkdir -p tmp/dry-run
         gh actions-importer dry-run azure-devops pipeline \
-          --pipeline-id ${{ github.event.inputs.pipeline-id }} \
-          --azure-devops-organization "${{ secrets.AZURE_DEVOPS_ORG }}" \
-          --azure-devops-project "${{ secrets.AZURE_DEVOPS_PROJECT }}" \
+          --pipeline-id 1636 \
+          --azure-devops-organization "${AZURE_DEVOPS_ORG}" \
+          --azure-devops-project "${AZURE_DEVOPS_PROJECT}" \
           --output-dir tmp/dry-run
+
+    # Step 6: Commit the migrated workflow to the repository (if the dry-run looks good)
+    - name: Move and commit migrated workflows
+      if: success() # Only if the dry-run is successful
+      run: |
+        # Move the workflows from the dry-run directory to the .github/workflows/
+        mv tmp/dry-run/.github/workflows/* .github/workflows/
+
+        # Commit the new workflows to the repository
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+        git add .github/workflows/
+        git commit -m "Add migrated Azure DevOps pipeline workflows"
+        git push origin main  # or whichever branch you're working with
+
+    # Optional: Step 7: Run the workflows after migration (this step depends on your requirements)
+    - name: Trigger migrated workflows (Optional)
+      if: success() # Only if the migration was successful
+      run: |
+        # Trigger the workflow (or manually check if workflows are valid)
+        gh workflow run <workflow-file.yml>
 
     - name: Upload Dry Run Results
       uses: actions/upload-artifact@v3
