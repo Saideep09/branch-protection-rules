@@ -80,14 +80,14 @@ jobs:
       run: |
         mkdir -p tmp/dry-run
         gh actions-importer dry-run azure-devops pipeline \
-          --pipeline-id "1636" \
-          --azure-devops-organization "MGMResortsDigitalEngineering" \
-          --azure-devops-project "Payment Services" \
-          --azure-devops-access-token "3nHiHFukAmzrvwWBMkD1OzDudZxqW0FKP3G2dvVqMfTnnSUZL1F7JQQJ99ALACAAAAAT72ceAAASAZDOMlOv" \
-          --github-access-token "${{ secrets.PAT_TOKEN }}" \
-          --output-dir tmp/dry-run \
-          --no-telemetry  # Disable telemetry to avoid related errors
-        cat tmp/dry-run/log/*  # Debugging log
+        --pipeline-id "${{ github.event.inputs.pipeline-id }}" \
+        --azure-devops-organization "MGMResortsDigitalEngineering" \
+        --azure-devops-project "Payment Services" \
+        --azure-devops-access-token "${{ secrets.AZURE_DEVOPS_TOKEN }}" \
+        --github-access-token "${{ secrets.PAT_TOKEN }}" \
+        --output-dir tmp/dry-run \
+        --no-telemetry  # Disable telemetry to avoid related errors
+        cat tmp/dry-run/log/*
 
     # Step 8: Upload Dry Run Results
     - name: Upload Dry Run Results
@@ -105,10 +105,16 @@ jobs:
     # Step 10: Move Generated Workflows
     - name: Move Generated Workflows
       run: |
-        mkdir -p .github/workflows
-        mv "tmp/dry-run/pipelines/Payment_Services/Payment_Diversity_[CNP]/MGMResorts.pd-payments-audit-trail/.github/workflows/*" .github/workflows/
-        echo "Listing files in .github/workflows:"
-        ls -l .github/workflows/
+        # List the directories before moving files
+        echo "Listing files in tmp/dry-run/pipelines/Payment_Services/Payment_Diversity_[CNP]/MGMResorts.pd-payments-audit-trail/.github/workflows:"
+        ls -l tmp/dry-run/pipelines/Payment_Services/Payment_Diversity_[CNP]/MGMResorts.pd-payments-audit-trail/.github/workflows/
+    
+        # Move the workflows if they exist
+        if [ -d "tmp/dry-run/pipelines/Payment_Services/Payment_Diversity_[CNP]/MGMResorts.pd-payments-audit-trail/.github/workflows" ]; then
+          mv "tmp/dry-run/pipelines/Payment_Services/Payment_Diversity_[CNP]/MGMResorts.pd-payments-audit-trail/.github/workflows/*" .github/workflows/
+        else
+          echo "No workflows found, skipping move step."
+        fi
 
     # Step 13: Stage Workflow Files
     - name: Stage Workflow Files
