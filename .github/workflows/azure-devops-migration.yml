@@ -99,6 +99,11 @@ jobs:
         name: audit-results
         path: tmp/audit
 
+    - name: Debug Dry-Run Output
+      run: |
+        echo "Listing files in tmp/dry-run:"
+        find tmp/dry-run
+
     # Step 11: Commit and Push Migrated Workflows (if dry run is successful)
     - name: Commit Migrated Workflows
       if: success()  # Only run if the previous steps succeeded
