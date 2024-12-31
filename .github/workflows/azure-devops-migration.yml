@@ -47,6 +47,8 @@ jobs:
         mkdir -p tmp/dry-run
         gh actions-importer dry-run azure-devops pipeline \
           --pipeline-id ${{ github.event.inputs.pipeline-id }} \
+          --azure-devops-organization ${{ secrets.AZURE_DEVOPS_ORG }} \
+          --azure-devops-project ${{ secrets.AZURE_DEVOPS_PROJECT }} \
           --output-dir tmp/dry-run
 
     - name: Audit Pipeline
@@ -56,6 +58,8 @@ jobs:
         mkdir -p tmp/audit
         gh actions-importer audit azure-devops pipeline \
           --pipeline-id ${{ github.event.inputs.pipeline-id }} \
+          --azure-devops-organization ${{ secrets.AZURE_DEVOPS_ORG }} \
+          --azure-devops-project ${{ secrets.AZURE_DEVOPS_PROJECT }} \
           --output-dir tmp/audit
 
     - name: Upload Dry Run Results
