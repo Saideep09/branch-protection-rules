@@ -1,36 +1,52 @@
-name: Migrate Azure DevOps to GitHub Actions
+name: Azure DevOps Migration Automation
 
 on:
   workflow_dispatch:
+    inputs:
+      pipeline-id:
+        description: "Azure DevOps Pipeline ID to migrate"
+        required: true
+        type: string
 
 jobs:
-  migrate:
+  migrate-pipeline:
     runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Check out the repository
+    # Step 1: Checkout repository
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    # Step 2: Set up GitHub CLI and install the extension
-    - name: Install GitHub CLI and gh-actions-importer extension
+    # Step 2: Install GitHub CLI
+    - name: Install GitHub CLI
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gh
+
+    # Step 3: Install Actions Importer Extension
+    - name: Install Actions Importer Extension
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        sudo apt-get install gh
         gh extension install github/gh-actions-importer
 
-    # Step 3: Configure GitHub Actions Importer
-    - name: Configure GitHub Actions Importer
+    # Step 4: Update Actions Importer Image
+    - name: Update Actions Importer Image
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        AZURE_DEVOPS_ORG: ${{ secrets.AZURE_DEVOPS_ORG }}
-        AZURE_DEVOPS_TOKEN: ${{ secrets.AZURE_DEVOPS_TOKEN }}
       run: |
-        gh actions-importer configure
+        gh actions-importer update
 
-    # Step 4: Perform dry-run migration
-    - name: Dry-run migration
+    # Step 5: Set Up Configuration Manually
+    - name: Set Up Configuration Manually
+      run: |
+        mkdir -p ~/.gh-actions-importer
+        echo "azure-devops:" > ~/.gh-actions-importer/config.yml
+        echo "  org: ${{ secrets.AZURE_DEVOPS_ORG }}" >> ~/.gh-actions-importer/config.yml
+        echo "  token: ${{ secrets.AZURE_DEVOPS_TOKEN }}" >> ~/.gh-actions-importer/config.yml
+
+    # Step 6: Dry Run Migration
+    - name: Dry Run Migration
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         AZURE_DEVOPS_ORG: ${{ secrets.AZURE_DEVOPS_ORG }}
@@ -39,14 +55,44 @@ jobs:
       run: |
         mkdir -p tmp/dry-run
         gh actions-importer dry-run azure-devops pipeline \
-          --pipeline-id 1636 \
-          --azure-devops-organization "${AZURE_DEVOPS_ORG}" \
-          --azure-devops-project "${AZURE_DEVOPS_PROJECT}" \
-          --output-dir tmp/dry-run
+          --pipeline-id ${{ github.event.inputs.pipeline-id }} \
+          --azure-devops-organization ${{ secrets.AZURE_DEVOPS_ORG }} \
+          --azure-devops-project ${{ secrets.AZURE_DEVOPS_PROJECT }} \
+          --output-dir tmp/dry-run \
+          --no-telemetry  # Disable telemetry to avoid related errors
 
-    # Step 5: Commit migrated workflows (if dry-run is successful)
-    - name: Commit migrated workflows
-      if: success()
+    # Step 7: Audit Pipeline
+    - name: Audit Pipeline
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        AZURE_DEVOPS_ORG: ${{ secrets.AZURE_DEVOPS_ORG }}
+        AZURE_DEVOPS_PROJECT: ${{ secrets.AZURE_DEVOPS_PROJECT }}
+        AZURE_DEVOPS_TOKEN: ${{ secrets.AZURE_DEVOPS_TOKEN }}
+      run: |
+        mkdir -p tmp/audit
+        gh actions-importer audit azure-devops pipeline \
+          --pipeline-id ${{ github.event.inputs.pipeline-id }} \
+          --azure-devops-organization ${{ secrets.AZURE_DEVOPS_ORG }} \
+          --azure-devops-project ${{ secrets.AZURE_DEVOPS_PROJECT }} \
+          --output-dir tmp/audit
+
+    # Step 8: Upload Dry Run Results
+    - name: Upload Dry Run Results
+      uses: actions/upload-artifact@v3
+      with:
+        name: dry-run-results
+        path: tmp/dry-run
+
+    # Step 9: Upload Audit Results
+    - name: Upload Audit Results
+      uses: actions/upload-artifact@v3
+      with:
+        name: audit-results
+        path: tmp/audit
+
+    # Step 10: Commit and Push Migrated Workflows (if dry run is successful)
+    - name: Commit Migrated Workflows
+      if: success()  # Only run if the previous steps succeeded
       run: |
         mv tmp/dry-run/.github/workflows/* .github/workflows/
         git config --global user.name "GitHub Actions"
