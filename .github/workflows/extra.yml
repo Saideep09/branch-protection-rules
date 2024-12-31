@@ -105,15 +105,15 @@ jobs:
     # Step 10: Move Generated Workflows
     - name: Move Generated Workflows
       run: |
-        # List the directories before moving files
+        # List the files in the workflows directory
         echo "Listing files in tmp/dry-run/pipelines/Payment_Services/Payment_Diversity_[CNP]/MGMResorts.pd-payments-audit-trail/.github/workflows:"
         ls -l tmp/dry-run/pipelines/Payment_Services/Payment_Diversity_[CNP]/MGMResorts.pd-payments-audit-trail/.github/workflows/
-    
-        # Move the workflows if they exist
-        if [ -d "tmp/dry-run/pipelines/Payment_Services/Payment_Diversity_[CNP]/MGMResorts.pd-payments-audit-trail/.github/workflows" ]; then
-          mv "tmp/dry-run/pipelines/Payment_Services/Payment_Diversity_[CNP]/MGMResorts.pd-payments-audit-trail/.github/workflows/*" .github/workflows/
+        
+        # Move the workflow file explicitly
+        if [ -f "tmp/dry-run/pipelines/Payment_Services/Payment_Diversity_[CNP]/MGMResorts.pd-payments-audit-trail/.github/workflows/mgmresorts.pd-payments-audit-trail.yml" ]; then
+          mv "tmp/dry-run/pipelines/Payment_Services/Payment_Diversity_[CNP]/MGMResorts.pd-payments-audit-trail/.github/workflows/mgmresorts.pd-payments-audit-trail.yml" .github/workflows/
         else
-          echo "No workflows found, skipping move step."
+          echo "No workflow file found, skipping move step."
         fi
 
     # Step 13: Stage Workflow Files
