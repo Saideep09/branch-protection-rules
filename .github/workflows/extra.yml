@@ -105,6 +105,7 @@ jobs:
     # Step 10: Move Generated Workflows
     - name: Move Generated Workflows
       run: |
+        mkdir -p .github/workflows
         mv "tmp/dry-run/pipelines/Payment_Services/Payment_Diversity_[CNP]/MGMResorts.pd-payments-audit-trail/.github/workflows/*" .github/workflows/
         echo "Listing files in .github/workflows:"
         ls -l .github/workflows/
