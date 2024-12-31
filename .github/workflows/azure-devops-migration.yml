@@ -27,6 +27,12 @@ jobs:
       run: |
         gh extension install github/gh-actions-importer
 
+    - name: Update Actions Importer Image
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh actions-importer update
+
     - name: Set Up Configuration Manually
       run: |
         mkdir -p ~/.gh-actions-importer
