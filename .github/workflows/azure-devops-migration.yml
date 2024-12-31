@@ -79,8 +79,8 @@ jobs:
           --pipeline-id "${{ github.event.inputs.pipeline-id }}" \
           --azure-devops-organization "${{ secrets.AZURE_DEVOPS_ORG }}" \
           --azure-devops-project "${{ secrets.AZURE_DEVOPS_PROJECT }}" \
-          --azure-devops-access-token "{{ secrets.AZURE_DEVOPS_TOKEN }}" \
-          --github-access-token "{{ secrets.PAT_TOKN }"\
+          --azure-devops-access-token "${{ secrets.AZURE_DEVOPS_TOKEN }}" \
+          --github-access-token "${{ secrets.PAT_TOKN }"\
           --output-dir tmp/dry-run \
           --no-telemetry  # Disable telemetry to avoid related errors
         cat tmp/dry-run/log/*  # Debugging log
