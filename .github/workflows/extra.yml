@@ -105,17 +105,24 @@ jobs:
     # Step 10: Move Generated Workflows
     - name: Move Generated Workflows
       run: |
-        mkdir -p .github/workflows
-        mv "tmp/dry-run/pipelines/Payment_Services/Payment_Diversity_[CNP]/MGMResorts.pd-payments-audit-trail/.github/workflows"/* .github/workflows/
+        mv "tmp/dry-run/pipelines/Payment_Services/Payment_Diversity_[CNP]/MGMResorts.pd-payments-audit-trail/.github/workflows/*" .github/workflows/
+        echo "Listing files in .github/workflows:"
+        ls -l .github/workflows/
 
-    # Step 11: Commit and Push Migrated Workflows
-    - name: Commit and Push Changes
-      env:
-        GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}  # Use the PAT secret here
+    # Step 13: Stage Workflow Files
+    - name: Stage Workflow Files
       run: |
         git config --global user.name "GitHub Actions"
         git config --global user.email "actions@github.com"
-        git add .github/workflows/*
+        git add .github/workflows/*  # Add all workflow files
+        git status  # Ensure files are staged
+
+    # Step 14: Commit and Push Changes
+    - name: Commit and Push Changes
+      env:
+        GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}  # Use the correct PAT secret here
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
         git commit -m "Add migrated Azure DevOps pipeline workflows"
         git push origin main
-
