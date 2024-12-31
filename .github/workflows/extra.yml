@@ -103,6 +103,17 @@ jobs:
         echo "Listing files in tmp/dry-run:"
         find tmp/dry-run
 
+    - name: Create Workflow File
+      run: |
+        mkdir -p .github/workflows
+        echo "contents of your workflow file here" > .github/workflows/mgmresorts.pd-payments-audit-trail.yml
+
+    - name: Upload Workflow File as Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: workflow-file  # Artifact name
+        path: .github/workflows/mgmresorts.pd-payments-audit-trail.yml
+
     # Step 10: Move Generated Workflows
     - name: Move Generated Workflows
       run: |
