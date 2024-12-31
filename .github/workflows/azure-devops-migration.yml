@@ -104,6 +104,17 @@ jobs:
         echo "Listing files in tmp/dry-run:"
         find tmp/dry-run
 
+    - name: Move Generated Workflows Dynamically
+      run: |
+        echo "Searching for generated workflow files..."
+        find tmp/dry-run -type f -name "*.yml" -exec mv {} .github/workflows/ \;
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+        git add .github/workflows/
+        git commit -m "Add migrated Azure DevOps pipeline workflows"
+        git push origin main
+
+
     # Step 11: Commit and Push Migrated Workflows (if dry run is successful)
     - name: Move Generated Workflows
       run: |
