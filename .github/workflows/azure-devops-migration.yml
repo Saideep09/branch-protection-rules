@@ -1,0 +1,60 @@
+name: Azure DevOps Migration Automation
+
+on:
+  workflow_dispatch:
+    inputs:
+      pipeline-id:
+        description: "Azure DevOps Pipeline ID to migrate"
+        required: true
+        type: string
+
+jobs:
+  migrate-pipeline:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Install GitHub CLI
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gh
+
+    - name: Install Actions Importer Extension
+      run: |
+        gh extension install github/gh-actions-importer
+
+    - name: Configure Actions Importer
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        AZURE_DEVOPS_ORG: ${{ secrets.AZURE_DEVOPS_ORG }}
+        AZURE_DEVOPS_TOKEN: ${{ secrets.AZURE_DEVOPS_TOKEN }}
+      run: |
+        gh actions-importer configure
+
+    - name: Dry Run Migration
+      run: |
+        mkdir -p tmp/dry-run
+        gh actions-importer dry-run azure-devops pipeline \
+          --pipeline-id ${{ github.event.inputs.pipeline-id }} \
+          --output-dir tmp/dry-run
+
+    - name: Audit Pipeline
+      run: |
+        mkdir -p tmp/audit
+        gh actions-importer audit azure-devops pipeline \
+          --pipeline-id ${{ github.event.inputs.pipeline-id }} \
+          --output-dir tmp/audit
+
+    - name: Upload Dry Run Results
+      uses: actions/upload-artifact@v3
+      with:
+        name: dry-run-results
+        path: tmp/dry-run
+
+    - name: Upload Audit Results
+      uses: actions/upload-artifact@v3
+      with:
+        name: audit-results
+        path: tmp/audit
