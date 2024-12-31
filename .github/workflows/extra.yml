@@ -138,14 +138,14 @@ jobs:
         git status  # Ensure files are staged
    
     # Step 14: Commit and Push Changes
-    - name: Commit and Push Changes to New Branch
+    - name: Commit and Push Changes to Same Branch
       env:
         GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
       run: |
         git config --global user.name "GitHub Actions"
         git config --global user.email "actions@github.com"
-        git checkout -b update-workflows
+        git checkout ${{ github.ref_name }}
         git add .github/workflows/*
         git commit -m "Add migrated Azure DevOps pipeline workflows"
-        git push origin update-workflows --force
+        git push origin ${{ github.ref_name }} --force
 
