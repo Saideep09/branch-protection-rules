@@ -30,14 +30,21 @@ jobs:
       run: |
         gh extension install github/gh-actions-importer
 
-    # Step 4: Update Actions Importer Image
+    # Step 4: Authenticate GitHub CLI
+    - name: Authenticate GitHub CLI
+      env:
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      run: |
+        gh auth login --with-token <<< "${GH_TOKEN}"
+
+    # Step 5: Update Actions Importer Image
     - name: Update Actions Importer Image
       env:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
       run: |
         gh actions-importer update
 
-    # Step 5: Set Up Configuration Manually
+    # Step 6: Set Up Configuration Manually
     - name: Set Up Configuration Manually
       run: |
         mkdir -p ~/.gh-actions-importer
@@ -45,7 +52,7 @@ jobs:
         echo "  org: ${{ secrets.AZURE_DEVOPS_ORG }}" >> ~/.gh-actions-importer/config.yml
         echo "  token: ${{ secrets.AZURE_DEVOPS_TOKEN }}" >> ~/.gh-actions-importer/config.yml
 
-    # Step 6: Dry Run Migration
+    # Step 7: Dry Run Migration
     - name: Dry Run Migration
       env:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -59,8 +66,9 @@ jobs:
           --azure-devops-organization "${{ secrets.AZURE_DEVOPS_ORG }}" \
           --azure-devops-project "${{ secrets.AZURE_DEVOPS_PROJECT }}" \
           --output-dir tmp/dry-run \
+          --no-telemetry  # Disable telemetry to avoid related errors
 
-    # Step 7: Audit Pipeline
+    # Step 8: Audit Pipeline
     - name: Audit Pipeline
       env:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -75,21 +83,21 @@ jobs:
           --azure-devops-project ${{ secrets.AZURE_DEVOPS_PROJECT }} \
           --output-dir tmp/audit
 
-    # Step 8: Upload Dry Run Results
+    # Step 9: Upload Dry Run Results
     - name: Upload Dry Run Results
       uses: actions/upload-artifact@v3
       with:
         name: dry-run-results
         path: tmp/dry-run
 
-    # Step 9: Upload Audit Results
+    # Step 10: Upload Audit Results
     - name: Upload Audit Results
       uses: actions/upload-artifact@v3
       with:
         name: audit-results
         path: tmp/audit
 
-    # Step 10: Commit and Push Migrated Workflows (if dry run is successful)
+    # Step 11: Commit and Push Migrated Workflows (if dry run is successful)
     - name: Commit Migrated Workflows
       if: success()  # Only run if the previous steps succeeded
       run: |
