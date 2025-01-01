@@ -71,7 +71,7 @@ jobs:
     # Step 6: Validate Azure DevOps Credentials
     - name: Validate Azure DevOps Credentials
       run: |
-        curl -u : "${{ secrets.AZURE_DEVOPS_TOKEN }}" https://dev.azure.com/"${{ secrets.AZURE_DEVOPS_ORG }}" | echo "Azure DevOps credentials validated."
+        curl -u : ${{ secrets.AZURE_DEVOPS_TOKEN }} https://dev.azure.com/"${{ env.AZURE_DEVOPS_ORG }}" | echo "Azure DevOps credentials validated."
 
     # Step 7: Dry Run Migration
     - name: Dry Run Migration
