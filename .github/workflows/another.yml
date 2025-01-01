@@ -138,6 +138,7 @@ jobs:
         git commit -m "Add migrated Azure DevOps pipeline workflows"
         git push 
 
+        # Step 14: Commit and Push Changes to Specific Repo and Branch
     - name: Commit and Push Changes to Specific Repo and Branch
       env:
         GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
@@ -145,13 +146,11 @@ jobs:
         git remote set-url origin https://github.com/Saideep09/branch-protection-rules.git
         git fetch origin SSDLC-pd-payments-audit-trail
         git checkout -b SSDLC-pd-payments-audit-trail origin/SSDLC-pd-payments-audit-trail
-        
-        # Merge remote changes
-        git pull origin <target-branch> --rebase
-        
+        git pull origin SSDLC-pd-payments-audit-trail --rebase
         git add tmp/
         git commit -m "Add migrated Azure DevOps pipeline workflows"
         git push origin SSDLC-pd-payments-audit-trail
+
         
     # # Step 14: Commit and Push Changes
     # - name: Commit and Push Changes to Specific Repo and Branch
