@@ -46,8 +46,8 @@ jobs:
     # Step 5: Validate Azure DevOps PAT
     - name: Validate Azure DevOps PAT
       env:
-        AZURE_DEVOPS_TOKEN: "3nHiHFukAmzrvwWBMkD1OzDudZxqW0FKP3G2dvVqMfTnnSUZL1F7JQQJ99ALACAAAAAT72ceAAASAZDOMlOv"
-        AZURE_DEVOPS_ORG: "MGMResortsDigitalEngineering"
+        AZURE_DEVOPS_TOKEN: "${{ secrets.AZURE_DEVOPS_TOKEN }}"
+        AZURE_DEVOPS_ORG: "${{ secrets.AZURE_DEVOPS_ORG }}"
       run: |
         echo "Validating Azure DevOps PAT..."
         response=$(curl -s -o /dev/null -w "%{http_code}" -u ":${AZURE_DEVOPS_TOKEN}" \
@@ -66,12 +66,12 @@ jobs:
         mkdir -p ~/.gh-actions-importer
         echo "azure-devops:" > ~/.gh-actions-importer/config.yml
         echo "  org: MGMResortsDigitalEngineering" >> ~/.gh-actions-importer/config.yml
-        echo "  token: 3nHiHFukAmzrvwWBMkD1OzDudZxqW0FKP3G2dvVqMfTnnSUZL1F7JQQJ99ALACAAAAAT72ceAAASAZDOMlOv" >> ~/.gh-actions-importer/config.yml
+        echo "  token: "${{ secrets.AZURE_DEVOPS_TOKEN }}"" >> ~/.gh-actions-importer/config.yml
 
     # Step 6: Validate Azure DevOps Credentials
     - name: Validate Azure DevOps Credentials
       run: |
-        curl -u :3nHiHFukAmzrvwWBMkD1OzDudZxqW0FKP3G2dvVqMfTnnSUZL1F7JQQJ99ALACAAAAAT72ceAAASAZDOMlOv https://dev.azure.com/MGMResortsDigitalEngineering | echo "Azure DevOps credentials validated."
+        curl -u : "${{ secrets.AZURE_DEVOPS_TOKEN }}" https://dev.azure.com/"${{ secrets.AZURE_DEVOPS_ORG }}" | echo "Azure DevOps credentials validated."
 
     # Step 7: Dry Run Migration
     - name: Dry Run Migration
@@ -79,7 +79,7 @@ jobs:
         GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         AZURE_DEVOPS_ORG: "MGMResortsDigitalEngineering"
         AZURE_DEVOPS_PROJECT: "Payment Services"
-        AZURE_DEVOPS_TOKEN: "3nHiHFukAmzrvwWBMkD1OzDudZxqW0FKP3G2dvVqMfTnnSUZL1F7JQQJ99ALACAAAAAT72ceAAASAZDOMlOv"
+        AZURE_DEVOPS_TOKEN: "${{ secrets.AZURE_DEVOPS_TOKEN }}"
       run: |
         mkdir -p tmp/dry-run
         gh actions-importer dry-run azure-devops pipeline \
@@ -105,16 +105,16 @@ jobs:
         echo "Listing files in tmp/dry-run:"
         find tmp/dry-run
 
-    - name: Create Workflow File
-      run: |
-        mkdir -p .github/workflows
-        echo "contents of your workflow file here" > .github/workflows/mgmresorts.pd-payments-audit-trail.yml
+    # - name: Create Workflow File
+    #   run: |
+    #     mkdir -p .github/workflows
+    #     echo "contents of your workflow file here" > .github/workflows/mgmresorts.pd-payments-audit-trail.yml
 
-    - name: Upload Workflow File as Artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: workflow-file  # Artifact name
-        path: .github/workflows/mgmresorts.pd-payments-audit-trail.yml
+    # - name: Upload Workflow File as Artifact
+    #   uses: actions/upload-artifact@v3
+    #   with:
+    #     name: workflow-file  # Artifact name
+    #     path: .github/workflows/mgmresorts.pd-payments-audit-trail.yml
 
     # Step 10: Move Generated Workflows
     - name: Move Generated Workflows
