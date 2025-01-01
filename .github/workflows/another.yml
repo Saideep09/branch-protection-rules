@@ -1,4 +1,4 @@
-name: extra
+name: specific repo and branch
 
 on:
   workflow_dispatch:
