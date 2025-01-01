@@ -133,10 +133,10 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
       run: |
         git remote set-url origin https://github.com/Saideep09/branch-protection-rules.git
-        git fetch origin SSDLC-pd-payments-audit-trail
-        git checkout -b SSDLC-pd-payments-audit-trail origin/SSDLC-pd-payments-audit-trail
-        git pull origin SSDLC-pd-payments-audit-trail --rebase
+        git fetch origin SSDLC-pd-payments-audit-trail1
+        git checkout -b SSDLC-pd-payments-audit-trail1 origin/SSDLC-pd-payments-audit-trail1
+        git pull origin SSDLC-pd-payments-audit-trail1 --rebase
         git add tmp/
         git commit -m "Add migrated Azure DevOps pipeline workflows"
-        git push origin SSDLC-pd-payments-audit-trail
+        git push origin SSDLC-pd-payments-audit-trail1
       
