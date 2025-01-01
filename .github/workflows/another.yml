@@ -139,17 +139,4 @@ jobs:
         git add tmp/
         git commit -m "Add migrated Azure DevOps pipeline workflows"
         git push origin SSDLC-pd-payments-audit-trail
-
-        
-    # # Step 14: Commit and Push Changes
-    # - name: Commit and Push Changes to Specific Repo and Branch
-    #   env:
-    #     GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-    #   run: |
-    #     git remote set-url origin https://github.com/Saideep09/branch-protection-rules.git
-    #     git checkout -b SSDLC-pd-payments-audit-trail
-    #     git add tmp/
-    #     git commit -m "Add migrated Azure DevOps pipeline workflows"
-    #     git push origin SSDLC-pd-payments-audit-trail
-
       
