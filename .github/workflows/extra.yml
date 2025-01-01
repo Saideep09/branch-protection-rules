@@ -77,8 +77,8 @@ jobs:
     - name: Dry Run Migration
       env:
         GH_TOKEN: ${{ secrets.PAT_TOKEN }}
-        AZURE_DEVOPS_ORG: "MGMResortsDigitalEngineering"
-        AZURE_DEVOPS_PROJECT: "Payment Services"
+        AZURE_DEVOPS_ORG: "${{ vars.AZURE_DEVOPS_ORG }}"
+        AZURE_DEVOPS_PROJECT: "${{ vars.AZURE_DEVOPS_PROJECT }}"
         AZURE_DEVOPS_TOKEN: "${{ secrets.AZURE_DEVOPS_TOKEN }}"
       run: |
         mkdir -p tmp/dry-run
