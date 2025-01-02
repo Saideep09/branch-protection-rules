@@ -43,6 +43,16 @@ jobs:
       run: |
         gh actions-importer update
 
+    - name: Search for Azure Pipeline YAML
+      run: |
+        if find . -name 'azure-pipelines.yml' -o -name '*pipeline*.yml'; then
+          echo "Azure Pipeline YAML found!"
+          echo "HAS_ADO_PIPELINE=true" >> $GITHUB_ENV
+        else
+          echo "No Azure Pipeline YAML found."
+          echo "HAS_ADO_PIPELINE=false" >> $GITHUB_ENV
+        fi
+
     #step: check for webhook connected to Azure DevOps
     - name: check for Azure DevOps Webhooks
       run: |
