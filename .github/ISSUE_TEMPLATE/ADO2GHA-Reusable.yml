@@ -21,7 +21,9 @@ body:
       label: "Repository name"
       description: "Enter the name of the Repo-name where the workflow will be saved"
       placeholder: "e.g., sample-repo"
-
+    validations:
+      required: true
+      
   - type: input
     id: AZURE_DEVOPS_ORG
     attributes:
@@ -37,7 +39,9 @@ body:
       label: "AZURE PROJECT NAME"
       description: "Enter the name of the AZURE DEVOPS PROJECT"
       placeholder: "e.g., SampleAzureProject"
-
+    validations:
+      required: true
+  
   - type: dropdown
     id: runtype
     attributes:
@@ -46,3 +50,5 @@ body:
       options:
         - "Dry-run"
         - "Audit"
+    validations:
+      required: true
