@@ -116,7 +116,7 @@ jobs:
         git remote remove origin || true
         git remote add origin https://github.com/Saideep09/lock-add-in-migration.git
         git remote -v
-        git remote set-url origin https://<your-token>@github.com/Saideep09/lock-add-in-migration.git
+        git remote set-url origin https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/Saideep09/lock-add-in-migration.git
         git add .github/workflows/*  # Add all workflow files
         git status  # Ensure files are staged
         git add tmp/
