@@ -44,15 +44,15 @@ jobs:
       run: echo "${{ github.event.issue.body }}"
 
     - name: Extract Issue Details
-      id: extract
+      id: extract  
       uses: actions/github-script@v6
       with:
         script: |
           const issueBody = context.payload.issue.body;
     
-          // Updated regex for parsing plain text format
+          // Parse each field based on '### Label' followed by the value
           function extractValue(label) {
-            const regex = new RegExp(`${label}:\\s*(.*)`);
+            const regex = new RegExp(`### ${label}\\n([^#]+)`, 'i');
             const match = issueBody.match(regex);
             return match ? match[1].trim() : null;
           }
