@@ -97,42 +97,5 @@ jobs:
         name: azure-devops-audit-logs
         path: tmp/audit/log/*
 
-    # Step 9: Debug Dry-Run Output
-    - name: Debug Dry-Run Output
-      run: |
-        echo "Listing files in tmp/dry-run:"
-        find tmp/dry-run
-
-    # Step 10: Move Generated Workflows
-    - name: Move Generated Workflows
-      run: |
-        # List the files in the workflows directory
-        echo "Listing files in tmp/dry-run/pipelines/Payment_Services/Payment_Diversity_[CNP]/MGMResorts.pd-payments-audit-trail/.github/workflows:"
-        ls -l tmp/dry-run/pipelines/Payment_Services/Payment_Diversity_[CNP]/MGMResorts.pd-payments-audit-trail/.github/workflows/
-        
-        # Move the workflow file explicitly
-        if [ -f "tmp/dry-run/pipelines/Payment_Services/Payment_Diversity_[CNP]/MGMResorts.pd-payments-audit-trail/.github/workflows/mgmresorts.pd-payments-audit-trail.yml" ]; then
-          mv "tmp/dry-run/pipelines/Payment_Services/Payment_Diversity_[CNP]/MGMResorts.pd-payments-audit-trail/.github/workflows/mgmresorts.pd-payments-audit-trail.yml" .github/workflows/
-        else
-          echo "No workflow file found, skipping move step."
-        fi
-
-    # Step 13: Stage Workflow Files
-    - name: Stage Workflow Files
-      run: |
-        git config --global user.name "GitHub Actions"
-        git config --global user.email "actions@github.com"
-        git add .github/workflows/*  # Add all workflow files
-        git status  # Ensure files are staged
-
-        # Step 14: Commit and Push Changes to Specific Repo and Branch
-    - name: Commit and Push Changes to Specific Repo and Branch
-      env:
-        GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-      run: |
-        git checkout -b SSDLC-pd-payments-audit-trail
-        git add tmp/
-        git commit -m "Add migrated Azure DevOps pipeline workflows"
-        git push origin SSDLC-pd-payments-audit-trail
-
+   
       
