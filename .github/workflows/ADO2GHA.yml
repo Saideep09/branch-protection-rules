@@ -128,13 +128,12 @@ jobs:
       run: |
         mkdir -p tmp/dry-run
         gh actions-importer dry-run azure-devops pipeline \
-        --pipeline-id "${{ github.event.inputs.pipeline-id }}" \
+        --pipeline-id "${{ steps.extract.outputs.pipelineId }}" \
         --azure-devops-organization "${{ steps.extract.outputs.azureOrg }}" \
         --azure-devops-project "${{ steps.extract.outputs.azureProject }}" \
         --azure-devops-access-token "${{ secrets.AZURE_DEVOPS_TOKEN }}" \
         --github-access-token "${{ secrets.PAT_TOKEN }}" \
-        --output-dir tmp/dry-run \
-        --no-telemetry  # Disable telemetry to avoid related errors
+        --output-dir tmp/dry-run 
         cat tmp/dry-run/log/*
 
     # Step 8: Upload Dry Run Results
@@ -177,9 +176,9 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
       run: |
-        git checkout -b SSDLC-pd-payments-audit-trail
+        git checkout -b SSDLC-pd-payments-audit-trail1
         git add tmp/
         git commit -m "Add migrated Azure DevOps pipeline workflows"
-        git push origin SSDLC-pd-payments-audit-trail
+        git push origin SSDLC-pd-payments-audit-trail1
 
       
