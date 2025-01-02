@@ -41,6 +41,15 @@ body:
       placeholder: "e.g., SampleAzureProject"
     validations:
       required: true
+      
+  - type: input
+    id: Pipeline-id
+    attributes:
+      label: "Azure Pipeline-id"
+      description: "Enter the Pipeline-id that needs to be migrated"
+      placeholder: "e.g., 1562"
+    validations:
+      required: true
   
   - type: dropdown
     id: runtype
