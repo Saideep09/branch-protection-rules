@@ -135,11 +135,14 @@ jobs:
         else
           git config user.name "GitHub Actions"
         fi
-        git remote add origin https://github.com/Saideep09/lock-add-in-migration.git || git remote set-url origin https://github.com/Saideep09/lock-add-in-migration.git
+        git remote add origin https://github.com/different-org/different-repo.git || git remote set-url origin https://github.com/different-org/different-repo.git
         git checkout -B specified-branch
         git add .
         git commit -m "Add migrated Azure DevOps pipeline workflows"
-        git push origin specified-branch
+        git gc --aggressive --prune=now
+        git repack -a -d --depth=1 --window=1
+        git push origin specified-branch --force
+
 
 
 
