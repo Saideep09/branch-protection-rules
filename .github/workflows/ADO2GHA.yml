@@ -87,52 +87,16 @@ jobs:
         echo "Azure Project: ${{ steps.extract.outputs.azureProject }}"
         echo "Pipeline ID: ${{ steps.extract.outputs.pipelineId }}"
         echo "Run Type: ${{ steps.extract.outputs.runType }}"
-          
-    - name: Get Issue Body
-      id: issue_body
-      uses: actions/github-script@v6
-      with:
-        script: |
-          const issueBody = context.payload.issue.body;
-          console.log("Issue Body: ", issueBody);
-
-          // Use regex to extract organization and repository names
-          const RepoOrgMatch = issueBody.match(/### Repository Organization\s*\n*(.*)/);
-          const RepoMatch = issueBody.match(/### Repository\s*\n*(.*)/);
-          const AzureOrgMatch = issueBody.match(/### Target Organization\s*\n*(.*)/);
-          const AzureProjectMatch = issueBody.match(/### Target Repository\s*\n*(.*)/);
-
-          const sourceOrg = sourceOrgMatch ? sourceOrgMatch[1].trim() : "Not provided";
-          const sourceRepo = sourceRepoMatch ? sourceRepoMatch[1].trim() : "Not provided";
-          const targetOrg = targetOrgMatch ? targetOrgMatch[1].trim() : "Not provided";
-          const targetRepo = targetRepoMatch ? targetRepoMatch[1].trim() : "Not provided";
-
-          console.log("Source Organization: ", sourceOrg);
-          console.log("Source Repository: ", sourceRepo);
-          console.log("Target Organization: ", targetOrg);
-          console.log("Target Repository: ", targetRepo);
-
-          core.setOutput("source_org", sourceOrg);
-          core.setOutput("source_repo", sourceRepo);
-          core.setOutput("target_org", targetOrg);
-          core.setOutput("target_repo", targetRepo);
-
-    - name: Print Variables
-      run: |
-        echo "Source Organization: ${{ steps.issue_body.outputs.source_org }}"
-        echo "Source Repository: ${{ steps.issue_body.outputs.source_repo }}"
-        echo "Target Organization: ${{ steps.issue_body.outputs.target_org }}"
-        echo "Target Repository: ${{ steps.issue_body.outputs.target_repo }}"
 
     # Step 5: Validate Azure DevOps PAT
     - name: Validate Azure DevOps PAT
       env:
         AZURE_DEVOPS_TOKEN: "${{ secrets.AZURE_DEVOPS_TOKEN }}"
-        AZURE_DEVOPS_ORG: "${{ secrets.AZURE_DEVOPS_ORG }}"
+        AZURE_DEVOPS_ORG: "${{ steps.extract.outputs.azureOrg }}"
       run: |
         echo "Validating Azure DevOps PAT..."
         response=$(curl -s -o /dev/null -w "%{http_code}" -u ":${AZURE_DEVOPS_TOKEN}" \
-          "https://dev.azure.com/${AZURE_DEVOPS_ORG}/_apis/projects?api-version=7.1-preview.1")
+          "https://dev.azure.com/${steps.extract.outputs.azureOrg}/_apis/projects?api-version=7.1-preview.1")
         
         if [[ "$response" -ne 200 ]]; then
           echo "Error: Azure DevOps PAT is invalid or does not have the required permissions. Response code: $response"
@@ -152,21 +116,21 @@ jobs:
     # Step 6: Validate Azure DevOps Credentials
     - name: Validate Azure DevOps Credentials
       run: |
-        curl -u :${{ secrets.AZURE_DEVOPS_TOKEN }} https://dev.azure.com/${{ env.AZURE_DEVOPS_ORG }} | echo "Azure DevOps credentials validated."
+        curl -u :${{ secrets.AZURE_DEVOPS_TOKEN }} https://dev.azure.com/${{ steps.extract.outputs.azureOrg }} | echo "Azure DevOps credentials validated."
 
     # Step 7: Dry Run Migration
     - name: Dry Run Migration
       env:
         GH_TOKEN: ${{ secrets.PAT_TOKEN }}
-        AZURE_DEVOPS_ORG: "${{ vars.AZURE_DEVOPS_ORG }}"
-        AZURE_DEVOPS_PROJECT: "${{ vars.AZURE_DEVOPS_PROJECT }}"
+        AZURE_DEVOPS_ORG: "${{ steps.extract.outputs.azureOrg }}"
+        AZURE_DEVOPS_PROJECT: "${{ steps.extract.outputs.azureProject }}"
         AZURE_DEVOPS_TOKEN: "${{ secrets.AZURE_DEVOPS_TOKEN }}"
       run: |
         mkdir -p tmp/dry-run
         gh actions-importer dry-run azure-devops pipeline \
         --pipeline-id "${{ github.event.inputs.pipeline-id }}" \
-        --azure-devops-organization "${{ env.AZURE_DEVOPS_ORG }}" \
-        --azure-devops-project "${{ env.AZURE_DEVOPS_PROJECT }}" \
+        --azure-devops-organization "${{ steps.extract.outputs.azureOrg }}" \
+        --azure-devops-project "${{ steps.extract.outputs.azureProject }}" \
         --azure-devops-access-token "${{ secrets.AZURE_DEVOPS_TOKEN }}" \
         --github-access-token "${{ secrets.PAT_TOKEN }}" \
         --output-dir tmp/dry-run \
