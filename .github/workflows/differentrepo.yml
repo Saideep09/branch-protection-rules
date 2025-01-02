@@ -121,4 +121,4 @@ jobs:
         git status  # Ensure files are staged
         git add .
         git commit -m "Add migrated Azure DevOps pipeline workflows"
-        git push
+        git push --set-upstream origin main
