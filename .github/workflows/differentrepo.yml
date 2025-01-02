@@ -125,6 +125,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
       run: |
         git init
+        # Configure user details
         if git config --get user.email; then
           echo "Git user email already set."
         else
@@ -135,15 +136,19 @@ jobs:
         else
           git config user.name "GitHub Actions"
         fi
+
+        # Handle existing remote
         git remote add origin https://github.com/Saideep09/lock-add-in-migration.git || git remote set-url origin https://github.com/Saideep09/lock-add-in-migration.git
+        
+        # Checkout and commit
         git checkout -B specified-branch
         git add .
         git commit -m "Add migrated Azure DevOps pipeline workflows"
-        git gc --aggressive --prune=now
+
+        # Optimize repository and push
+        git gc --prune=now
         git repack -a -d --depth=1 --window=1
         git push origin specified-branch --force
-
-
 
 
 
