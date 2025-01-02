@@ -117,7 +117,6 @@ jobs:
         git remote add origin https://github.com/Saideep09/lock-add-in-migration.git
         git add .github/workflows/*  # Add all workflow files
         git status  # Ensure files are staged
-        git checkout -b specified-branch
         git add tmp/
         git commit -m "Add migrated Azure DevOps pipeline workflows"
-        git push origin specified-branch --force
+        git push --force new-origin main
