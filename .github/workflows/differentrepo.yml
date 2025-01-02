@@ -124,12 +124,25 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
       run: |
-        git init
-        git remote add origin https://github.com/Saideep09/lock-add-in-migration.git
-        git checkout -b specified-branch
+        # Initialize git repository if not already initialized
+        if [ ! -d ".git" ]; then
+          git init
+        fi
+        
+        # Check if remote 'origin' already exists and update it
+        if git remote get-url origin; then
+          git remote set-url origin https://github.com/Saideep09/lock-add-in-migration.git
+        else
+          git remote add origin https://github.com/Saideep09/lock-add-in-migration.git
+        fi
+        
+        # Checkout to the specified branch
+        git checkout -B specified-branch
+        
+        # Add, commit, and push changes
         git add .
         git commit -m "Add migrated Azure DevOps pipeline workflows"
-        git push origin specified-branch
+        git push -u origin specified-branch
 
 
-      
+
