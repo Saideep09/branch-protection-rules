@@ -117,6 +117,7 @@ jobs:
         git remote add origin https://github.com/Saideep09/lock-add-in-migration.git
         git remote -v
         git remote set-url origin https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/Saideep09/lock-add-in-migration.git
+        git config pull.rebase true
         git pull origin main --set-upstream
         git add .github/workflows/*  # Add all workflow files
         git status  # Ensure files are staged
