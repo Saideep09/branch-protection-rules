@@ -114,9 +114,9 @@ jobs:
         git config --global user.name "GitHub Actions"
         git config --global user.email "actions@github.com"
         git remote remove origin || true
-        git remote add origin https://github.com/Saideep09/lock-add-in-migration.git
+        git remote add origin https://github.com/Saideep09/sample-check.git
         git remote -v
-        git remote set-url origin https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/Saideep09/lock-add-in-migration.git
+        git remote set-url origin https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/Saideep09/sample-check.git
         git config pull.rebase true
         git pull origin main --set-upstream
         git add .github/workflows/*  # Add all workflow files
