@@ -73,14 +73,14 @@ jobs:
       run: |
         curl -u :${{ secrets.AZURE_DEVOPS_TOKEN }} https://dev.azure.com/${{ env.AZURE_DEVOPS_ORG }} | echo "Azure DevOps credentials validated."
 
-    # Step 7: Dry Run Migration
-    - name: Dry Run Migration
+    - name: Audit
       env:
         GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         AZURE_DEVOPS_ORG: "${{ vars.AZURE_DEVOPS_ORG }}"
         AZURE_DEVOPS_PROJECT: "${{ vars.AZURE_DEVOPS_PROJECT }}"
         AZURE_DEVOPS_TOKEN: "${{ secrets.AZURE_DEVOPS_TOKEN }}"
       run: |
+        set -e
         mkdir -p tmp/audit
         gh actions-importer audit azure-devops pipeline \
         --azure-devops-organization "${{ env.AZURE_DEVOPS_ORG }}" \
@@ -88,15 +88,14 @@ jobs:
         --azure-devops-access-token "${{ secrets.AZURE_DEVOPS_TOKEN }}" \
         --github-access-token "${{ secrets.PAT_TOKEN }}" \
         --output-dir tmp/audit \
-        --no-telemetry  # Disable telemetry to avoid related errors
+        --no-telemetry
         cat tmp/audit/log/*
-
-    # Step 8: Upload Dry Run Results
-    - name: Upload Dry Run Results
+        
+    - name: Upload Audit Logs
       uses: actions/upload-artifact@v3
       with:
-        name: dry-run-results
-        path: tmp/dry-run
+        name: azure-devops-audit-logs
+        path: tmp/audit/log/*
 
     # Step 9: Debug Dry-Run Output
     - name: Debug Dry-Run Output
