@@ -115,8 +115,10 @@ jobs:
         git config --global user.email "actions@github.com"
         git remote remove origin || true
         git remote add origin https://github.com/Saideep09/lock-add-in-migration.git
+        git remote -v
+        git remote set-url origin https://<your-token>@github.com/Saideep09/lock-add-in-migration.git
         git add .github/workflows/*  # Add all workflow files
         git status  # Ensure files are staged
         git add tmp/
         git commit -m "Add migrated Azure DevOps pipeline workflows"
-        git push --force new-origin main
+        git push --force origin main
