@@ -146,7 +146,7 @@ jobs:
         git remote add origin https://github.com/Saideep09/lock-add-in-migration.git
 
         # Checkout the specified branch
-        git checkout -B specified-branch
+        git checkout -b specified-branch
         
         # Add, Commit, and Optimize Repository
         git add .
