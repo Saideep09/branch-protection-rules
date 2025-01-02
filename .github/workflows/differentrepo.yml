@@ -113,35 +113,13 @@ jobs:
         GIT_TRACE: 1
         GIT_CURL_VERBOSE: 1
       run: |
-        git init
-        if git config --get user.email; then
-          echo "Git user email already set."
-        else
-          git config user.email "actions@github.com"
-        fi
-        if git config --get user.name; then
-          echo "Git user name already set."
-        else
-          git config user.name "GitHub Actions"
-        fi
-        
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
         git remote remove origin || true
         git remote add origin https://github.com/Saideep09/lock-add-in-migration.git
+        git add .github/workflows/*  # Add all workflow files
+        git status  # Ensure files are staged
         git checkout -B specified-branch
         git add .
         git commit -m "Add migrated Azure DevOps pipeline workflows"
-
-        # Optimize repository
-        git gc --prune=now
-        git repack -A -d --window=50 --depth=50
-        git reflog expire --expire=now --all
-        git repack -a -d --depth=1 --window=1
-
-        # Increase buffer size
-        git config http.postBuffer 524288000
-        git config pack.windowMemory 256m
-        git config pack.packSizeLimit 256m
-        git config pack.threads 1
-
-        # Push changes with verbose output
         git push origin specified-branch --force
