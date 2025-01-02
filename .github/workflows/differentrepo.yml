@@ -119,22 +119,17 @@ jobs:
           echo "No workflow file found, skipping move step."
         fi
 
-    # Step 13: Stage Workflow Files
-    - name: Stage Workflow Files
-      run: |
-        git config --global user.name "GitHub Actions"
-        git config --global user.email "actions@github.com"
-        git add .github/workflows/*  # Add all workflow files
-        git status  # Ensure files are staged
-
-        # Step 14: Commit and Push Changes to Specific Repo and Branch
-    - name: Commit and Push Changes to Specific Repo and Branch
+    # Step 13: Commit and Push Changes to Different Repo and Branch
+    - name: Commit and Push Changes to Different Repo and Branch
       env:
         GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
       run: |
-        git checkout -b SSDLC-pd-payments-audit-trail
-        git add tmp/
+        git init
+        git remote add origin https://github.com/Saideep09/lock-add-in-migration.git
+        git checkout -b specified-branch
+        git add .
         git commit -m "Add migrated Azure DevOps pipeline workflows"
-        git push origin SSDLC-pd-payments-audit-trail
+        git push origin specified-branch
+
 
       
