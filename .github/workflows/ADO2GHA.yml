@@ -41,42 +41,42 @@ jobs:
         gh actions-importer update
 
     - name: Extract Issue Details
-        id: extract
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const issueBody = context.payload.issue.body;
+      id: extract
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const issueBody = context.payload.issue.body;
 
-            // Parse each field from the issue body
-            function extractValue(label) {
-              const regex = new RegExp(`${label}\\s*\\n*\\s*:\\s*(.*)`);
-              const match = issueBody.match(regex);
-              return match ? match[1].trim() : null;
-            }
+          // Parse each field from the issue body
+          function extractValue(label) {
+            const regex = new RegExp(`${label}\\s*\\n*\\s*:\\s*(.*)`);
+            const match = issueBody.match(regex);
+            return match ? match[1].trim() : null;
+          }
 
-            const orgName = extractValue('Repository Organization');
-            const repoName = extractValue('Repository name');
-            const azureOrg = extractValue('AZURE ORGANIZATION NAME');
-            const azureProject = extractValue('AZURE PROJECT NAME');
-            const pipelineId = extractValue('Azure Pipeline-id');
-            const runType = extractValue('Run-Type');
+          const orgName = extractValue('Repository Organization');
+          const repoName = extractValue('Repository name');
+          const azureOrg = extractValue('AZURE ORGANIZATION NAME');
+          const azureProject = extractValue('AZURE PROJECT NAME');
+          const pipelineId = extractValue('Azure Pipeline-id');
+          const runType = extractValue('Run-Type');
 
-            // Export to outputs
-            core.setOutput('orgName', orgName);
-            core.setOutput('repoName', repoName);
-            core.setOutput('azureOrg', azureOrg);
-            core.setOutput('azureProject', azureProject);
-            core.setOutput('pipelineId', pipelineId);
-            core.setOutput('runType', runType);
+          // Export to outputs
+          core.setOutput('orgName', orgName);
+          core.setOutput('repoName', repoName);
+          core.setOutput('azureOrg', azureOrg);
+          core.setOutput('azureProject', azureProject);
+          core.setOutput('pipelineId', pipelineId);
+          core.setOutput('runType', runType);
 
     - name: Display Extracted Details
-        run: |
-          echo "Organization: ${{ steps.extract.outputs.orgName }}"
-          echo "Repository: ${{ steps.extract.outputs.repoName }}"
-          echo "Azure Org: ${{ steps.extract.outputs.azureOrg }}"
-          echo "Azure Project: ${{ steps.extract.outputs.azureProject }}"
-          echo "Pipeline ID: ${{ steps.extract.outputs.pipelineId }}"
-          echo "Run Type: ${{ steps.extract.outputs.runType }}"
+      run: |
+        echo "Organization: ${{ steps.extract.outputs.orgName }}"
+        echo "Repository: ${{ steps.extract.outputs.repoName }}"
+        echo "Azure Org: ${{ steps.extract.outputs.azureOrg }}"
+        echo "Azure Project: ${{ steps.extract.outputs.azureProject }}"
+        echo "Pipeline ID: ${{ steps.extract.outputs.pipelineId }}"
+        echo "Run Type: ${{ steps.extract.outputs.runType }}"
           
     - name: Get Issue Body
       id: issue_body
