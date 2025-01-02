@@ -117,11 +117,15 @@ jobs:
         git remote add origin https://github.com/Saideep09/sample-check.git
         git remote -v
         git remote set-url origin https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/Saideep09/sample-check.git
+        git checkout -b temp-branch
+        git rm -r --cached .
+        git checkout -- tmp/dry-run/pipelines/
         git config pull.rebase true
         git pull origin main --set-upstream
         git add .github/workflows/*  # Add all workflow files
         git status  # Ensure files are staged
-        git add .
+        git add tmp/dry-run/pipelines/
         git commit -m "Add migrated Azure DevOps pipeline workflows"
-        git push origin main
+        git push origin temp-branch:main
+
 
