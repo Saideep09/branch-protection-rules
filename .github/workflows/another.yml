@@ -43,6 +43,11 @@ jobs:
       run: |
         gh actions-importer update
 
+    #step: check for webhook connected to Azure DevOps
+    - name: check for Azure DevOps Webhooks
+      run: |
+        HOOKS= $(curl -s -H "Authorization ) 
+
     # Step 5: Validate Azure DevOps PAT
     - name: Validate Azure DevOps PAT
       env:
