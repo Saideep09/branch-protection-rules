@@ -120,11 +120,16 @@ jobs:
         fi
 
     # Step 13: Commit and Push Changes to Different Repo and Branch
+        # Step 13: Commit and Push Changes to Different Repo and Branch
     - name: Commit and Push Changes to Different Repo and Branch
       env:
         GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        GIT_TRACE_PACKET: 1
+        GIT_TRACE: 1
       run: |
         git init
+        
+        # Configure Git User
         if git config --get user.email; then
           echo "Git user email already set."
         else
@@ -135,9 +140,19 @@ jobs:
         else
           git config user.name "GitHub Actions"
         fi
+
+        # Remove existing remote and add the new one
         git remote remove origin || true
-        git remote add origin https://github.com//Saideep09/lock-add-in-migration.git
+        git remote add origin https://github.com/Saideep09/lock-add-in-migration.git
+
+        # Checkout the specified branch
         git checkout -B specified-branch
+        
+        # Add, Commit, and Optimize Repository
         git add .
         git commit -m "Add migrated Azure DevOps pipeline workflows"
-        git push origin specified-branch
+        git gc --aggressive --prune=now
+        git repack -a -d --depth=1 --window=1
+
+        # Force Push with Verbose Logging
+        git push origin specified-branch --force
