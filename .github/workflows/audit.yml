@@ -82,7 +82,7 @@ jobs:
       run: |
         set -e
         mkdir -p tmp/audit
-        gh actions-importer audit azure-devops pipeline \
+        gh actions-importer audit azure-devops \
         --azure-devops-organization "${{ env.AZURE_DEVOPS_ORG }}" \
         --azure-devops-project "${{ env.AZURE_DEVOPS_PROJECT }}" \
         --azure-devops-access-token "${{ secrets.AZURE_DEVOPS_TOKEN }}" \
