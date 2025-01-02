@@ -21,6 +21,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
       with:
+        repository: MGMResorts/pd-payments-audit/trail
         token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
     # Step 2: Install GitHub CLI
