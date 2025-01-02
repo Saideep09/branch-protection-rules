@@ -81,15 +81,15 @@ jobs:
         AZURE_DEVOPS_PROJECT: "${{ vars.AZURE_DEVOPS_PROJECT }}"
         AZURE_DEVOPS_TOKEN: "${{ secrets.AZURE_DEVOPS_TOKEN }}"
       run: |
-        mkdir -p tmp/dry-run
-        gh actions-importer dry-run azure-devops pipeline \
+        mkdir -p tmp/audit
+        gh actions-importer audit azure-devops pipeline \
         --azure-devops-organization "${{ env.AZURE_DEVOPS_ORG }}" \
         --azure-devops-project "${{ env.AZURE_DEVOPS_PROJECT }}" \
         --azure-devops-access-token "${{ secrets.AZURE_DEVOPS_TOKEN }}" \
         --github-access-token "${{ secrets.PAT_TOKEN }}" \
         --output-dir tmp/audit \
         --no-telemetry  # Disable telemetry to avoid related errors
-        cat tmp/dry-run/log/*
+        cat tmp/audit/log/*
 
     # Step 8: Upload Dry Run Results
     - name: Upload Dry Run Results
