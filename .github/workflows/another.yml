@@ -46,8 +46,18 @@ jobs:
     #step: check for webhook connected to Azure DevOps
     - name: check for Azure DevOps Webhooks
       run: |
-        HOOKS= $(curl -s -H "Authorization ) 
+        HOOKS=$(curl -s -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
+                    -H "Accept: application/vnd.github.v3+json" \
+                    https://api.github.com/repos/MGMResorts/pd-payments-audit-trail/hooks)
 
+        if echo "$HOOKS" | grep -q 'dev.azure.com'; then
+          echo "Azure DevOps Webhook found!"
+          echo "HAS_ADO_WEBHOOK=true" >> $GITHUB_ENV
+        else
+          echo "No Azure DevOps Webhook found."
+          echo "HAS_ADO_WEBHOOK=false" >> $GITHUB_ENV
+        fi
+        
     # Step 5: Validate Azure DevOps PAT
     - name: Validate Azure DevOps PAT
       env:
