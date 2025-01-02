@@ -46,22 +46,29 @@ jobs:
       with:
         script: |
           const issueBody = context.payload.issue.body;
-
-          // Parse each field from the issue body
+    
+          // Parse each field using updated regex pattern to handle bold formatting
           function extractValue(label) {
-            const regex = new RegExp(`${label}\\s*\\n*\\s*:\\s*(.*)`);
+            const regex = new RegExp(`\\*\\*${label}\\*\\*\\s*\\n*\\s*([^\n]+)`);
             const match = issueBody.match(regex);
             return match ? match[1].trim() : null;
           }
-
+    
           const orgName = extractValue('Repository Organization');
           const repoName = extractValue('Repository name');
           const azureOrg = extractValue('AZURE ORGANIZATION NAME');
           const azureProject = extractValue('AZURE PROJECT NAME');
           const pipelineId = extractValue('Azure Pipeline-id');
           const runType = extractValue('Run-Type');
-
-          // Export to outputs
+    
+          // Log and export values for debugging and reuse
+          console.log(`Organization: ${orgName}`);
+          console.log(`Repository: ${repoName}`);
+          console.log(`Azure Org: ${azureOrg}`);
+          console.log(`Azure Project: ${azureProject}`);
+          console.log(`Pipeline ID: ${pipelineId}`);
+          console.log(`Run Type: ${runType}`);
+    
           core.setOutput('orgName', orgName);
           core.setOutput('repoName', repoName);
           core.setOutput('azureOrg', azureOrg);
