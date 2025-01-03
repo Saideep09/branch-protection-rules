@@ -39,47 +39,24 @@ jobs:
           awk '{print $0 " -> new_" $2 ", New "$1}' target-repo/authors.txt > target-repo/mappings.txt
           cat target-repo/mappings.txt
 
-      - name: Rewrite Commit History
+      - name: Prepare Author Mapping File for git-filter-repo
+        run: |
+          cd target-repo
+          touch authors.txt
+          while IFS= read -r line; do
+            old_email=$(echo "$line" | cut -d' ' -f2)
+            new_email=$(echo "$line" | cut -d' ' -f4)
+            new_name=$(echo "$line" | cut -d' ' -f5-)
+            echo "$old_email=$new_name <$new_email>" >> authors.txt
+          done < mappings.txt
+          cat authors.txt
+
+      - name: Rewrite Commit History Using CLI
         run: |
           cd target-repo
           
-          # Prepare Python script for rewriting authors
-          cat << 'EOF' > rewrite_authors.py
-          import sys
-          import os
-          
-          # Mapping for author replacements
-          author_mappings = {
-          EOF
-          
-                    # Append mappings dynamically
-                    while IFS= read -r line; do
-                      old_email=$(echo "$line" | cut -d' ' -f2)
-                      new_email=$(echo "$line" | cut -d' ' -f4)
-                      new_name=$(echo "$line" | cut -d' ' -f5-)
-                      echo "    \"$old_email\": (\"$new_email\", \"$new_name\")," >> rewrite_authors.py
-                    done < mappings.txt
-          
-                    # Continue the Python script
-                    cat << 'EOF' >> rewrite_authors.py
-          }
-          
-          # Define function to update commit author
-          def update_author(commit):
-              email = commit.author_email.decode("utf-8")
-              if email in author_mappings:
-                  new_email, new_name = author_mappings[email]
-                  commit.author_email = new_email.encode("utf-8")
-                  commit.author_name = new_name.encode("utf-8")
-          
-          # Apply the filtering
-          from git_filter_repo import FilterRepo
-          repo = FilterRepo.create()
-          repo.filter_commits(callback=update_author)
-          EOF
-          
-                    # Run the author rewrite script
-                    python3 rewrite_authors.py
+          # Use git-filter-repo CLI to rewrite author info
+          git-filter-repo --path . --mailmap authors.txt --force
 
       - name: Upload Authors as Artifact
         uses: actions/upload-artifact@v3
