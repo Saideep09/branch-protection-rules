@@ -20,6 +20,7 @@ jobs:
           fetch-depth: 0
           path: target-repo 
 
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -32,60 +33,23 @@ jobs:
         run: |
           # Fetch authors and save to a file inside target-repo
           git -C target-repo log --all --pretty="%an <%ae>" | sort | uniq > target-repo/authors.txt
-
-      - name: Process Authors and Update Mappings using Python
+      - name: Process Authors using Python
         run: |
           python3 - <<EOF
           import sys
-          import os
-          from git_filter_repo import FilterRepo
-
           # Read authors from the target-repo directory
           with open("target-repo/authors.txt", "r") as f:
               authors_raw = f.read()
-
-          # Parse authors into a dictionary
           authors = {}
           for line in authors_raw.splitlines():
               if line.strip():
                   name, email = line.rsplit(" <", 1)
                   email = email.rstrip(">")
                   authors[email] = name
-
-          # Print authors dictionary
           print("Authors Dictionary:", authors)
-
-          # Define mappings for authors to update their email and name
-          author_mappings = {
-              email: (f"new_{email}", f"New {name}")
-              for email, name in authors.items()
-          }
-
-          # Display mappings for verification
-          print("\nAuthor Mappings:")
-          for old_email, (new_email, new_name) in author_mappings.items():
-              print(f"{old_email} -> {new_email}, {new_name}")
-
-          # Define the function to update commit authors
-          def update_author(commit):
-              email = commit.author_email.decode("utf-8")
-              if email in author_mappings:
-                  new_email, new_name = author_mappings[email]
-                  commit.author_email = new_email.encode("utf-8")
-                  commit.author_name = new_name.encode("utf-8")
-
-          # Apply the commit filtering with the update_author function
-          if os.path.exists('target-repo'):
-              os.chdir('target-repo')
-              repo = FilterRepo.create()
-              repo.filter_commits(callback=update_author)
-          else:
-              print("Error: Target repository not found!")
-              sys.exit(1)
           EOF
-
       - name: Upload Authors as Artifact
         uses: actions/upload-artifact@v3
         with:
           name: authors-list
-          path: target-repo/authors.txt
+          path: authors.txt
