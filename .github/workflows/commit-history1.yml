@@ -1,0 +1,64 @@
+name: Extract authors
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  extract-authors:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Target Repository
+        uses: actions/checkout@v4
+        with: 
+          repository: MGMResorts/mgm-af-migrations-via-actions
+          token: ${{ secrets.PAT_TOKEN }}
+          fetch-depth: 0
+          path: target-repo 
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install git-filter-repo
+        run: pip install git-filter-repo
+
+      - name: Fetch Unique Authors
+        run: |
+          # Fetch authors and save to a file inside target-repo
+          git -C target-repo log --all --pretty="%an <%ae>" | sort | uniq > target-repo/authors.txt
+
+      - name: Generate Author Mapping
+        run: |
+          # Create mappings in a file
+          awk '{print $0 " -> new_" $2 ", New "$1}' target-repo/authors.txt > target-repo/mappings.txt
+          cat target-repo/mappings.txt
+
+      - name: Rewrite Commit History
+        run: |
+          cd target-repo
+
+          # Prepare authors mapping file for git-filter-repo
+          touch authors.txt
+          while IFS= read -r line; do
+            old_email=$(echo "$line" | cut -d' ' -f2)
+            new_email=$(echo "$line" | cut -d' ' -f4)
+            new_name=$(echo "$line" | cut -d' ' -f5-)
+            echo "$old_email=$new_name <$new_email>" >> authors.txt
+          done < mappings.txt
+          
+          cat authors.txt
+
+          # Apply the author filtering
+          git-filter-repo --path . --replace-text authors.txt --force
+
+      - name: Upload Authors as Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: authors-list
+          path: target-repo/authors.txt
