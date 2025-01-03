@@ -55,7 +55,7 @@ jobs:
                   email = email.rstrip(">")
                   authors[email] = name
           print("Authors Dictionary:", authors)
-EOF
+          EOF
 
       - name: Upload Authors as Artifact
         uses: actions/upload-artifact@v3
