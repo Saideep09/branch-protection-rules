@@ -15,8 +15,8 @@ jobs:
       - name: Checkout Target Repository
         uses: actions/checkout@v4
         with: 
-          repository: MGMResorts/mgm-af-migrations-via-actions
-          token: ${{ secrets.PAT_TOKEN }}
+          repository: Saideep09/branch-protection-rules
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           fetch-depth: 0
           path: target-repo 
 
