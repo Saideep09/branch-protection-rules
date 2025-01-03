@@ -56,7 +56,12 @@ jobs:
       - name: Prepare Mailmap File
         run: |
           cd target-repo
+          
+          # Create a temporary copy to avoid infinite loop
+          cp authors.txt authors_temp.txt
           touch authors.txt
+          
+          # Process the temp file and write to authors.txt
           while IFS= read -r line; do
             # Extract original email and name
             old_name=$(echo "$line" | cut -d' ' -f1)
@@ -68,12 +73,11 @@ jobs:
             
             # Write valid mailmap entry
             echo "$old_email $new_name <$new_email>" >> authors.txt
-          done < authors.txt
+          done < authors_temp.txt
           
           # Display the final mailmap file
           echo "Mailmap File Content:"
           cat authors.txt
-
 
       - name: Rewrite Commit History Using CLI
         run: |
