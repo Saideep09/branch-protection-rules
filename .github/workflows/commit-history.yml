@@ -28,7 +28,6 @@ jobs:
       - name: Install git-filter-repo
         run: pip install git-filter-repo
 
-      # Print authors BEFORE changes
       - name: Print Authors Before Rewrite
         run: |
           echo "Authors Before Rewrite:"
@@ -36,11 +35,10 @@ jobs:
 
       - name: Generate Author Mapping
         run: |
-          # Prepare author mappings dynamically
           cd target-repo
           git log --all --pretty="%an <%ae>" | sort | uniq > authors.txt
           
-          # Generate mappings
+          # Prepare mappings
           touch mappings.txt
           while IFS= read -r line; do
             old_email=$(echo "$line" | cut -d' ' -f2 | tr -d '<>')
@@ -49,62 +47,48 @@ jobs:
             echo "$old_email $new_name <$new_email>" >> mappings.txt
           done < authors.txt
           
-          # Display mappings
           echo "Author Mappings:"
           cat mappings.txt
 
-      - name: Prepare Mailmap File
+      - name: Rewrite Commit History with Python Script
         run: |
           cd target-repo
+          cat << EOF > rewrite_authors.py
+          import sys
+          from git_filter_repo import FilterRepo
           
-          # Create a temporary copy to avoid infinite loop
-          cp authors.txt authors_temp.txt
-          touch authors.txt
+          author_mappings = {
+          EOF
           
-          # Process the temp file and write to authors.txt
-          while IFS= read -r line; do
-            # Extract original email and name
-            old_name=$(echo "$line" | cut -d' ' -f1)
-            old_email=$(echo "$line" | cut -d' ' -f2 | tr -d '<>')
-            
-            # Generate new email and name dynamically
-            new_email="new_${old_email}"
-            new_name="New ${old_name}"
-            
-            # Write valid mailmap entry
-            echo "$old_email $new_name <$new_email>" >> authors.txt
-          done < authors_temp.txt
+                    while IFS= read -r line; do
+                      old_email=$(echo "$line" | cut -d' ' -f2 | tr -d '<>')
+                      new_email="new_${old_email}"
+                      new_name="New $(echo "$line" | cut -d' ' -f1)"
+                      echo "    \"$old_email\": (\"$new_email\", \"$new_name\")," >> target-repo/rewrite_authors.py
+                    done < mappings.txt
           
-          # Display the final mailmap file
-          echo "Mailmap File Content:"
-          cat authors.txt
-
-      - name: Rewrite Commit History Using CLI
+                    cat << EOF >> target-repo/rewrite_authors.py
+          }
+          
+          def update_author(commit):
+              email = commit.author_email.decode("utf-8")
+              if email in author_mappings:
+                  new_email, new_name = author_mappings[email]
+                  commit.author_email = new_email.encode("utf-8")
+                  commit.author_name = new_name.encode("utf-8")
+          
+          FilterRepo().filter_commits(callback=update_author)
+          EOF
+          
+                    python3 rewrite_authors.py
+          
+      - name: Force Push Rewritten History
         run: |
           cd target-repo
-          # Use git-filter-repo CLI to rewrite author info
-          git-filter-repo --mailmap authors.txt --force
-
-      - name: Push Rewritten History to Remote
-        run: |
-          cd target-repo
-          # Re-add the remote origin
           git remote add origin https://github.com/Saideep09/branch-protection-rules.git
-          
-          # Fetch remote data (just in case)
-          git fetch origin
-
-          # Force push and set upstream during push
           git push origin main --force --set-upstream
 
-      # Print authors AFTER changes
       - name: Print Authors After Rewrite
         run: |
           echo "Authors After Rewrite:"
           git -C target-repo log --all --pretty="%an <%ae>" | sort | uniq
-
-      - name: Upload Authors as Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: authors-list
-          path: target-repo/authors.txt
