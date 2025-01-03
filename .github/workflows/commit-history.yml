@@ -1,21 +1,25 @@
-name: Extract authors 
+name: Extract authors
 
 on:
-  workflow_dispatch: 
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write
 
 jobs:
   extract-authors:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout Target Repository
         uses: actions/checkout@v4
         with: 
           repository: MGMResorts/mgm-af-migrations-via-actions
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           fetch-depth: 0
 
-      - name: set up python
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
@@ -23,87 +27,38 @@ jobs:
       - name: Install git-filter-repo
         run: pip install git-filter-repo
 
-      - name: commit-history script
+      - name: Fetch Unique Authors
         run: |
-          #!/bin/bash
+          # Move into the checked-out repository
+          cd mgm-af-migrations-via-actions
 
-          # Ensure the script exits on errors
-          
-          set -e
-          
-          # Check if git-filter-repo is installed
-          if ! command -v git-filter-repo &> /dev/null; then
-              echo "git-filter-repo is not installed. Installing via pip..."
-              pip install git-filter-repo
-          fi
-          
-          # Extract unique author names and emails from git log
-          echo "Fetching unique authors from git log..."
-          authors=$(git log --pretty="%an <%ae>" | sort | uniq)
-          
-          # Display the extracted authors
-          echo "The following authors were found in the repository:"
-          echo "$authors"
-          
-          # Pass the authors to a Python script
+          # Fetch all history
+          git fetch --all --tags --prune
+
+          # Extract unique authors
+          authors=$(git log --all --pretty="%an <%ae>" | sort | uniq)
+
+          # Save authors to a file
+          echo "$authors" > authors.txt
+
+      - name: Process Authors using Python
+        run: |
           python3 - <<EOF
           import sys
-          
-          # Extracted authors as a string
-          authors_raw = """$authors"""
-          
-          # Convert the string into a dictionary
-          # Assuming format: "Name <email>"
+          # Read authors from the file
+          with open("authors.txt", "r") as f:
+              authors_raw = f.read()
           authors = {}
           for line in authors_raw.splitlines():
-              if line.strip():  # Ignore empty lines
+              if line.strip():
                   name, email = line.rsplit(" <", 1)
                   email = email.rstrip(">")
                   authors[email] = name
-          
-          # Print the resulting dictionary
-          print("Authors Dictionary:")
-          print(authors)
-          
-          # Define mappings for authors to update their email and name
-          # Example of dynamic generation for new email/name mappings:
-          author_mappings = {
-              email: (f"new_{email}", f"New {name}")
-              for email, name in authors.items()
-          }
-          
-          # Display mappings for verification
-          print("\nAuthor Mappings:")
-          for old_email, (new_email, new_name) in author_mappings.items():
-              print(f"{old_email} -> {new_email}, {new_name}")
-          
-          # Define the function to update commit authors
-          def update_author(commit):
-              email = commit.author_email.decode("utf-8")
-              if email in author_mappings:
-                  new_email, new_name = author_mappings[email]
-                  commit.author_email = new_email.encode("utf-8")
-                  commit.author_name = new_name.encode("utf-8")
-          
-          # Apply the commit filtering with the update_author function
-          filter_commits(callback=update_author)
-          EOF
-          
-          # Clean up temporary script on exit
-          trap "rm -f $filter_script" EXIT
+          print("Authors Dictionary:", authors)
+EOF
 
-
-      - name: save authors to file
-        run: |
-          git log --all --pretty="%an <%ae>" | sort | uniq > authors.txt
-      - name: upload Authors as artifact
+      - name: Upload Authors as Artifact
         uses: actions/upload-artifact@v3
         with:
           name: authors-list
           path: authors.txt
-
-          
-
-      
-      
-    
