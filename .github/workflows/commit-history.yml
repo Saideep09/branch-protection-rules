@@ -16,8 +16,10 @@ jobs:
         uses: actions/checkout@v4
         with: 
           repository: MGMResorts/mgm-af-migrations-via-actions
-          token: ${{ secrets.PAT_TOKEN }}
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           fetch-depth: 0
+          path: target-repo 
+
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -29,15 +31,15 @@ jobs:
 
       - name: Fetch Unique Authors
         run: |
-          # Move into the checked-out repository
-          cd mgm-af-migrations-via-actions
-
+          # Move into the checked-out repository directory
+          cd target-repo
+          
           # Fetch all history
           git fetch --all --tags --prune
-
+          
           # Extract unique authors
           authors=$(git log --all --pretty="%an <%ae>" | sort | uniq)
-
+          
           # Save authors to a file
           echo "$authors" > authors.txt
 
