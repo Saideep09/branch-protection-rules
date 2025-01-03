@@ -53,6 +53,7 @@ jobs:
       - name: Rewrite Commit History with Python Script
         run: |
           cd target-repo
+          # Create the Python script inside the current directory
           cat << EOF > rewrite_authors.py
           import sys
           from git_filter_repo import FilterRepo
@@ -60,14 +61,16 @@ jobs:
           author_mappings = {
           EOF
           
+                    # Generate mappings dynamically
                     while IFS= read -r line; do
                       old_email=$(echo "$line" | cut -d' ' -f2 | tr -d '<>')
                       new_email="new_${old_email}"
                       new_name="New $(echo "$line" | cut -d' ' -f1)"
-                      echo "    \"$old_email\": (\"$new_email\", \"$new_name\")," >> target-repo/rewrite_authors.py
+                      echo "    \"$old_email\": (\"$new_email\", \"$new_name\")," >> rewrite_authors.py
                     done < mappings.txt
           
-                    cat << EOF >> target-repo/rewrite_authors.py
+                    # Complete the Python script
+                    cat << EOF >> rewrite_authors.py
           }
           
           def update_author(commit):
@@ -80,8 +83,9 @@ jobs:
           FilterRepo().filter_commits(callback=update_author)
           EOF
           
+                    # Execute the Python script
                     python3 rewrite_authors.py
-          
+
       - name: Force Push Rewritten History
         run: |
           cd target-repo
