@@ -1,4 +1,4 @@
-name: Extract authors
+name: Extract authors and Rewrite History
 
 on:
   workflow_dispatch:
@@ -28,17 +28,21 @@ jobs:
       - name: Install git-filter-repo
         run: pip install git-filter-repo
 
+      # Print authors BEFORE the rewrite
       - name: Print Authors Before Rewrite
         run: |
           echo "Authors Before Rewrite:"
           git -C target-repo log --all --pretty="%an <%ae>" | sort | uniq
 
+      # Generate Author Mapping File
       - name: Generate Author Mapping
         run: |
           cd target-repo
+          
+          # Create mappings.txt file
           git log --all --pretty="%an <%ae>" | sort | uniq > authors.txt
           
-          # Prepare mappings
+          # Prepare the mappings
           touch mappings.txt
           while IFS= read -r line; do
             old_email=$(echo "$line" | cut -d' ' -f2 | tr -d '<>')
@@ -47,52 +51,54 @@ jobs:
             echo "$old_email $new_name <$new_email>" >> mappings.txt
           done < authors.txt
           
+          # Display mappings
           echo "Author Mappings:"
           cat mappings.txt
 
-      - name: Rewrite Commit History with Python Script
+      # Apply Rewrites Using git-filter-repo CLI
+      - name: Rewrite Commit History
         run: |
           cd target-repo
-          # Create the Python script inside the current directory
-          cat << EOF > rewrite_authors.py
-          import sys
-          from git_filter_repo import FilterRepo
           
-          author_mappings = {
-          EOF
+          # Generate the authors.txt file for rewriting
+          touch authors.txt
+          while IFS= read -r line; do
+            old_email=$(echo "$line" | cut -d' ' -f2 | tr -d '<>')
+            new_email="new_${old_email}"
+            new_name="New $(echo "$line" | cut -d' ' -f1)"
+            echo "$old_email=$new_name <$new_email>" >> authors.txt
+          done < mappings.txt
           
-                    # Generate mappings dynamically
-                    while IFS= read -r line; do
-                      old_email=$(echo "$line" | cut -d' ' -f2 | tr -d '<>')
-                      new_email="new_${old_email}"
-                      new_name="New $(echo "$line" | cut -d' ' -f1)"
-                      echo "    \"$old_email\": (\"$new_email\", \"$new_name\")," >> rewrite_authors.py
-                    done < mappings.txt
+          # Show the final mapping file
+          echo "Authors Mapping File:"
+          cat authors.txt
           
-                    # Complete the Python script
-                    cat << EOF >> rewrite_authors.py
-          }
-          
-          def update_author(commit):
-              email = commit.author_email.decode("utf-8")
-              if email in author_mappings:
-                  new_email, new_name = author_mappings[email]
-                  commit.author_email = new_email.encode("utf-8")
-                  commit.author_name = new_name.encode("utf-8")
-          
-          FilterRepo().filter_commits(callback=update_author)
-          EOF
-          
-                    # Execute the Python script
-                    python3 rewrite_authors.py
+          # Apply author rewriting with git-filter-repo CLI
+          git-filter-repo --replace-text authors.txt --force
 
-      - name: Force Push Rewritten History
+      # Force Push the Rewritten History
+      - name: Push Rewritten History to Remote
         run: |
           cd target-repo
+          
+          # Re-add remote origin
           git remote add origin https://github.com/Saideep09/branch-protection-rules.git
+          
+          # Fetch remote branches
+          git fetch origin
+          
+          # Force push rewritten history and set upstream
           git push origin main --force --set-upstream
 
+      # Print authors AFTER the rewrite
       - name: Print Authors After Rewrite
         run: |
           echo "Authors After Rewrite:"
           git -C target-repo log --all --pretty="%an <%ae>" | sort | uniq
+
+      # Upload the Author Mapping as an Artifact
+      - name: Upload Authors Mapping
+        uses: actions/upload-artifact@v3
+        with:
+          name: authors-mapping
+          path: target-repo/authors.txt
