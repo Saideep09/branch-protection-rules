@@ -88,8 +88,14 @@ jobs:
       - name: Push Rewritten History to Remote
         run: |
           cd target-repo
+          # Re-add the remote origin
           git remote add origin https://github.com/Saideep09/branch-protection-rules.git
-          git push origin --force
+
+          # Set upstream branch for main
+          git branch --set-upstream-to=origin/main main
+
+          # Force push the rewritten history
+          git push origin main --force
 
       # Print authors AFTER changes
       - name: Print Authors After Rewrite
