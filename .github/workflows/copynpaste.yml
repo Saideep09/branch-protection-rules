@@ -1,0 +1,46 @@
+name: Copy samw.yml File
+
+on:
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  copy-file:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checkout the source repository
+    - name: Checkout Source Repository
+      uses: actions/checkout@v4
+      with:
+        repository: Saideep09/seva_migration
+        ref: main
+        token: ${{ secrets.SOURCE_REPO_PAT }} # PAT with repo access
+
+    # Copy the required file
+    - name: Copy File
+      run: |
+        mkdir -p temp_folder
+        cp .github/workflows/samw.yml temp_folder/
+
+    # Checkout the destination repository
+    - name: Checkout Destination Repository
+      uses: actions/checkout@v4
+      with:
+        repository: Saideep09/branch-protection-rules
+        ref: main
+        token: ${{ secrets.DEST_REPO_PAT }} # PAT with repo access
+
+    # Move the copied file to the workflows folder in destination
+    - name: Move File to Destination
+      run: |
+        mkdir -p .github/workflows
+        mv ../temp_folder/samw.yml .github/workflows/
+
+    # Commit and push changes to the destination repository
+    - name: Commit and Push Changes
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        git add .github/workflows/samw.yml
+        git commit -m "Add samw.yml copied from source repository"
+        git push origin main
