@@ -90,12 +90,12 @@ jobs:
           cd target-repo
           # Re-add the remote origin
           git remote add origin https://github.com/Saideep09/branch-protection-rules.git
+          
+          # Fetch remote data (just in case)
+          git fetch origin
 
-          # Set upstream branch for main
-          git branch --set-upstream-to=origin/main main
-
-          # Force push the rewritten history
-          git push origin main --force
+          # Force push and set upstream during push
+          git push origin main --force --set-upstream
 
       # Print authors AFTER changes
       - name: Print Authors After Rewrite
