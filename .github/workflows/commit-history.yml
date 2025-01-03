@@ -31,24 +31,15 @@ jobs:
 
       - name: Fetch Unique Authors
         run: |
-          # Move into the checked-out repository directory
-          cd target-repo
-          
-          # Fetch all history
-          git fetch --all --tags --prune
-          
-          # Extract unique authors
-          authors=$(git log --all --pretty="%an <%ae>" | sort | uniq)
-          
-          # Save authors to a file
-          echo "$authors" > authors.txt
+          # Fetch authors and save to a file inside target-repo
+          git -C target-repo log --all --pretty="%an <%ae>" | sort | uniq > target-repo/authors.txt
 
       - name: Process Authors using Python
         run: |
           python3 - <<EOF
           import sys
-          # Read authors from the file
-          with open("authors.txt", "r") as f:
+          # Read authors from the target-repo directory
+          with open("target-repo/authors.txt", "r") as f:
               authors_raw = f.read()
           authors = {}
           for line in authors_raw.splitlines():
@@ -58,6 +49,7 @@ jobs:
                   authors[email] = name
           print("Authors Dictionary:", authors)
           EOF
+
 
       - name: Upload Authors as Artifact
         uses: actions/upload-artifact@v3
