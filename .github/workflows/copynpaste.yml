@@ -14,7 +14,7 @@ jobs:
       with:
         repository: Saideep09/seva_migration
         ref: main
-        token: ${{ secrets.SOURCE_REPO_PAT }} # PAT with repo access
+        token: ${{ secrets.SOURCE_REPO_PAT }}
 
     # Copy the required file
     - name: Copy File
@@ -22,21 +22,29 @@ jobs:
         mkdir -p temp_folder
         cp .github/workflows/samw.yml temp_folder/
 
+    # Persist the copied file as an artifact
+    - name: Upload File as Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: samw-file
+        path: temp_folder/samw.yml
+
     # Checkout the destination repository
     - name: Checkout Destination Repository
       uses: actions/checkout@v4
       with:
         repository: Saideep09/branch-protection-rules
         ref: main
-        token: ${{ secrets.DEST_REPO_PAT }} # PAT with repo access
+        token: ${{ secrets.DEST_REPO_PAT }}
 
-    # Move the copied file to the workflows folder in destination
-    - name: Move File to Destination
-      run: |
-        mkdir -p .github/workflows
-        mv ../temp_folder/samw.yml .github/workflows/
+    # Download the artifact to access the copied file
+    - name: Download Artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: samw-file
+        path: .github/workflows/
 
-    # Commit and push changes to the destination repository
+    # Commit and push changes to the destination repo
     - name: Commit and Push Changes
       run: |
         git config --global user.name 'github-actions[bot]'
