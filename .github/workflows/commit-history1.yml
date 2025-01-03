@@ -45,12 +45,13 @@ jobs:
           touch authors.txt
           while IFS= read -r line; do
             old_email=$(echo "$line" | cut -d' ' -f2)
-            new_email=$(echo "$line" | cut -d' ' -f4)
-            new_name=$(echo "$line" | cut -d' ' -f5-)
+            new_email=$(echo "$line" | cut -d' ' -f4 | tr -d '<>')
+            new_name=$(echo "$line" | cut -d' ' -f5- | tr -d '<>,')
             echo "$old_email $new_name <$new_email>" >> authors.txt
           done < mappings.txt
+          
+          # Display final authors.txt content
           cat authors.txt
-
 
       - name: Rewrite Commit History Using CLI
         run: |
