@@ -54,8 +54,9 @@ jobs:
           
           cat authors.txt
 
-          # Apply the author filtering
-          git-filter-repo --path . --replace-text authors.txt --force
+          # Apply the author filtering with correct syntax
+          git-filter-repo --replace-commit-author authors.txt --force
+
 
       - name: Upload Authors as Artifact
         uses: actions/upload-artifact@v3
