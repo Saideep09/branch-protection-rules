@@ -58,21 +58,34 @@ jobs:
           cd target-repo
           touch authors.txt
           while IFS= read -r line; do
+            # Extract original email and name
+            old_name=$(echo "$line" | cut -d' ' -f1)
             old_email=$(echo "$line" | cut -d' ' -f2 | tr -d '<>')
+            
+            # Generate new email and name dynamically
             new_email="new_${old_email}"
-            new_name="New $(echo "$line" | cut -d' ' -f1)"
+            new_name="New ${old_name}"
+            
+            # Write valid mailmap entry
             echo "$old_email $new_name <$new_email>" >> authors.txt
-          done < mappings.txt
+          done < authors.txt
           
-          # Show the mailmap file
+          # Display the final mailmap file
           echo "Mailmap File Content:"
           cat authors.txt
+
 
       - name: Rewrite Commit History Using CLI
         run: |
           cd target-repo
           # Use git-filter-repo CLI to rewrite author info
           git-filter-repo --mailmap authors.txt --force
+
+      - name: Push Rewritten History to Remote
+        run: |
+          cd target-repo
+          git remote add origin https://github.com/Saideep09/branch-protection-rules.git
+          git push origin --force
 
       # Print authors AFTER changes
       - name: Print Authors After Rewrite
