@@ -56,7 +56,8 @@ jobs:
           cd target-repo
           
           # Use git-filter-repo CLI to rewrite author info
-          git-filter-repo --path . --mailmap authors.txt --force
+          git-filter-repo --mailmap authors.txt --force
+
 
       - name: Upload Authors as Artifact
         uses: actions/upload-artifact@v3
