@@ -47,9 +47,10 @@ jobs:
             old_email=$(echo "$line" | cut -d' ' -f2)
             new_email=$(echo "$line" | cut -d' ' -f4)
             new_name=$(echo "$line" | cut -d' ' -f5-)
-            echo "$old_email=$new_name <$new_email>" >> authors.txt
+            echo "$old_email $new_name <$new_email>" >> authors.txt
           done < mappings.txt
           cat authors.txt
+
 
       - name: Rewrite Commit History Using CLI
         run: |
@@ -57,7 +58,6 @@ jobs:
           
           # Use git-filter-repo CLI to rewrite author info
           git-filter-repo --mailmap authors.txt --force
-
 
       - name: Upload Authors as Artifact
         uses: actions/upload-artifact@v3
