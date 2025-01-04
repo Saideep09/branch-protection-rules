@@ -34,8 +34,8 @@ jobs:
           echo "Authors Before Rewrite:"
           git -C target-repo log --all --pretty="%an <%ae>" | sort | uniq
 
-      # Generate Author Mapping
-      - name: Generate Author Mapping File
+      # Generate Author Mapping File
+      - name: Generate Author Mapping
         run: |
           cd target-repo
           
@@ -54,43 +54,27 @@ jobs:
           echo "Author Mappings:"
           cat mappings.txt
 
-      # Rewrite Author Information Using Python Callback
-      - name: Rewrite Commit History with Python Script
+      # Rewrite Commit History Using CLI
+      - name: Rewrite Commit History
         run: |
           cd target-repo
           
-          # Prepare Python script for git-filter-repo
-          cat << EOF > rewrite_authors.py
-          import sys
-          from git_filter_repo import FilterRepo
+          # Generate authors mapping file for git-filter-repo
+          touch authors.txt
+          while IFS= read -r line; do
+            old_email=$(echo "$line" | cut -d' ' -f2 | tr -d '<>')
+            new_email="new_${old_email}"
+            new_name="New $(echo "$line" | cut -d' ' -f1)"
+            echo "$old_email=$new_name <$new_email>" >> authors.txt
+          done < mappings.txt
           
-          # Define author mappings
-          author_mappings = {
-          EOF
+          # Display the final mapping file
+          echo "Authors Mapping File:"
+          cat authors.txt
           
-                    while IFS= read -r line; do
-                      old_email=$(echo "$line" | cut -d' ' -f2 | tr -d '<>')
-                      new_email="new_${old_email}"
-                      new_name="New $(echo "$line" | cut -d' ' -f1)"
-                      echo "    \"$old_email\": (\"$new_email\", \"$new_name\")," >> rewrite_authors.py
-                    done < mappings.txt
-          
-                    cat << EOF >> rewrite_authors.py
-          }
-          
-          def update_author(commit):
-              email = commit.author_email.decode("utf-8")
-              if email in author_mappings:
-                  new_email, new_name = author_mappings[email]
-                  commit.author_email = new_email.encode("utf-8")
-                  commit.author_name = new_name.encode("utf-8")
-          
-          FilterRepo().filter_commits(callback=update_author)
-          EOF
-          
-                    # Execute Python script to rewrite history
-                    python3 rewrite_authors.py
-          
+          # Use git-filter-repo CLI to rewrite authors
+          git-filter-repo --path . --replace-text authors.txt --force
+
       # Force Push Rewritten History
       - name: Push Rewritten History to Remote
         run: |
