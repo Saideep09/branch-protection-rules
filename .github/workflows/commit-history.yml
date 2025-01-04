@@ -15,10 +15,11 @@ jobs:
       - name: Checkout Target Repository
         uses: actions/checkout@v4
         with: 
-          repository: Saideep09/branch-protection-rules
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          repository: MGMResorts/mgm-af-migrations-via-actions
+          token: ${{ secrets.PAT_TOKEN }}
           fetch-depth: 0
           path: target-repo 
+
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -28,11 +29,32 @@ jobs:
       - name: Install git-filter-repo
         run: pip install git-filter-repo
 
-      # Print authors BEFORE rewrite
       - name: Print Authors Before Rewrite
         run: |
           echo "Authors Before Rewrite:"
           git -C target-repo log --all --pretty="%an <%ae>" | sort | uniq
+
+      - name: Fetch Unique Authors
+        run: |
+          # Fetch authors and save to a file inside target-repo
+          git -C target-repo log --all --pretty="%an <%ae>" | sort | uniq > target-repo/authors.txt
+          
+      - name: Process Authors using Python
+        run: |
+          python3 - <<EOF
+          import sys
+          # Read authors from the target-repo directory
+          with open("target-repo/authors.txt", "r") as f:
+              authors_raw = f.read()
+          authors = {}
+          for line in authors_raw.splitlines():
+              if line.strip():
+                  name, email = line.rsplit(" <", 1)
+                  email = email.rstrip(">")
+                  authors[email] = name
+          print("Authors Dictionary:", authors)
+          EOF
+
 
       # Generate Author Mapping File
       - name: Generate Author Mapping
