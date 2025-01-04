@@ -40,40 +40,27 @@ jobs:
           cd target-repo
           
           # Create mappings dynamically
-          touch mappings.txt
+          touch mailmap.txt
           git log --all --pretty="%an <%ae>" | sort | uniq > authors.txt
           
           while IFS= read -r line; do
             old_email=$(echo "$line" | cut -d' ' -f2 | tr -d '<>')
             new_email="new_${old_email}"
             new_name="New $(echo "$line" | cut -d' ' -f1)"
-            echo "$old_email $new_name <$new_email>" >> mappings.txt
+            echo "$old_email $new_name <$new_email>" >> mailmap.txt
           done < authors.txt
           
           # Display mappings
-          echo "Author Mappings:"
-          cat mappings.txt
+          echo "Mailmap File:"
+          cat mailmap.txt
 
-      # Rewrite Commit History Using CLI
+      # Rewrite Commit History Using --mailmap
       - name: Rewrite Commit History
         run: |
           cd target-repo
           
-          # Generate authors mapping file for git-filter-repo
-          touch authors.txt
-          while IFS= read -r line; do
-            old_email=$(echo "$line" | cut -d' ' -f2 | tr -d '<>')
-            new_email="new_${old_email}"
-            new_name="New $(echo "$line" | cut -d' ' -f1)"
-            echo "$old_email=$new_name <$new_email>" >> authors.txt
-          done < mappings.txt
-          
-          # Display the final mapping file
-          echo "Authors Mapping File:"
-          cat authors.txt
-          
-          # Use git-filter-repo CLI to rewrite authors
-          git-filter-repo --path . --replace-text authors.txt --force
+          # Apply author rewrite using --mailmap
+          git-filter-repo --mailmap mailmap.txt --force
 
       # Force Push Rewritten History
       - name: Push Rewritten History to Remote
@@ -93,4 +80,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: authors-mapping
-          path: target-repo/mappings.txt
+          path: target-repo/mailmap.txt
