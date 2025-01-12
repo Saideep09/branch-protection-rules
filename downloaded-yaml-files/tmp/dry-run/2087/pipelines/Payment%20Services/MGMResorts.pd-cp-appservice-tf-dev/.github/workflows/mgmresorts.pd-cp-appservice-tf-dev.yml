@@ -1,0 +1,36 @@
+name: Payment%20Services/MGMResorts.pd-cp-appservice-tf-dev
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - develop
+env:
+  application_insight_string: InstrumentationKey=180cc335-675a-4c0e-80c0-1e843cb4a6ea;IngestionEndpoint=https://westus2-2.in.applicationinsights.azure.com/;LiveEndpoint=https://westus2.livediagnostics.monitor.azure.com/;ApplicationId=408719b5-ab54-4b08-96d1-f543c6e71f20
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout
+      uses: actions/checkout@v4.1.0
+    - name: WebAppService
+      run: echo Creating WebApp
+#     # This item has no matching transformer
+#     - task: TerraformTaskV4@4
+#       inputs:
+#         provider: azurerm
+#         command: init
+#         commandOptions: -backend-config=resource_group_name="rg-pd-cp-d-azuw" -backend-config=storage_account_name="pdcptfstate01dev" -backend-config=container_name="tfstatetest" -backend-config=key="pd-cp-webapp-d-azuw/terraform.tfstate"
+#         backendServiceArm: Payment Dev SP
+#         backendAzureRmResourceGroupName: rg-pd-cp-d-azuw
+#         backendAzureRmStorageAccountName: pdcptfstate01dev
+#         backendAzureRmContainerName: tfstatetest
+#         backendAzureRmKey: pd-cp-webapp-d-azuw/terraform.tfstate
+#     # This item has no matching transformer
+#     - task: TerraformTaskV4@4
+#       inputs:
+#         provider: azurerm
+#         command: plan
+#         commandOptions: "-var-file=terraform_dev_azuw.tfvars"
+#         environmentServiceNameAzureRM: Payment Dev SP

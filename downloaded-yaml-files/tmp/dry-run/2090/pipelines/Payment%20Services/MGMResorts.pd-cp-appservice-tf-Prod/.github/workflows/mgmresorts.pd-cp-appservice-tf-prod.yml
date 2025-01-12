@@ -1,0 +1,34 @@
+name: Payment%20Services/MGMResorts.pd-cp-appservice-tf-Prod
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - develop
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout
+      uses: actions/checkout@v4.1.0
+    - name: WebAppService
+      run: echo Creating WebApp
+#     # This item has no matching transformer
+#     - task: TerraformTaskV4@4
+#       inputs:
+#         provider: azurerm
+#         command: init
+#         commandOptions: -backend-config=resource_group_name="rg-pd-cp-p-azuw" -backend-config=storage_account_name="pdcptfstate01prod" -backend-config=container_name="tfstateprd" -backend-config=key="pd-cp-webapp-p-azue/terraform.tfstate"
+#         backendServiceArm: Payment Prod SP
+#         backendAzureRmResourceGroupName: rg-pd-cp-p-azuw
+#         backendAzureRmStorageAccountName: pdcptfstate01prod
+#         backendAzureRmContainerName: tfstateprd
+#         backendAzureRmKey: pd-cp-webapp-p-azue/terraform.tfstate
+#     # This item has no matching transformer
+#     - task: TerraformTaskV4@4
+#       inputs:
+#         provider: azurerm
+#         command: plan
+#         commandOptions: "-var-file=terraform_p_azue.tfvars"
+#         environmentServiceNameAzureRM: Payment Prod SP

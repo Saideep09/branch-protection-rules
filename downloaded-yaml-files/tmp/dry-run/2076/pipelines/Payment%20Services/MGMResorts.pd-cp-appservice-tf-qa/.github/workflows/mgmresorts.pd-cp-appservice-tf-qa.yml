@@ -1,0 +1,37 @@
+name: Payment%20Services/MGMResorts.pd-cp-appservice-tf-qa
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - develop
+env:
+  application_insight_string: InstrumentationKey=d90d97b7-8a1b-49b1-889a-ea35b97d5bd9;IngestionEndpoint=https://westus2-2.in.applicationinsights.azure.com/;LiveEndpoint=https://westus2.livediagnostics.monitor.azure.com/;ApplicationId=7e47f97d-5895-4189-af28-27aa8fd63c0f
+  keyvault_secret_ref: "@Microsoft.KeyVault(SecretUri=https://paymentprv-uw-kv-d.vault.azure.net/secrets/pd-cp-config-secret-d/e3a2910db3c84fe3b87d1120512e2e70)"
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout
+      uses: actions/checkout@v4.1.0
+    - name: WebAppService
+      run: echo Creating WebApp
+#     # This item has no matching transformer
+#     - task: TerraformTaskV4@4
+#       inputs:
+#         provider: azurerm
+#         command: init
+#         commandOptions: -backend-config=resource_group_name="rg-pd-cp-d-azuw" -backend-config=storage_account_name="pdcptfstate01dev" -backend-config=container_name="tfstatetest" -backend-config=key="pd-cp-webapp-q-azuw/terraform.tfstate"
+#         backendServiceArm: Payment Dev SP
+#         backendAzureRmResourceGroupName: rg-pd-cp-d-azuw
+#         backendAzureRmStorageAccountName: pdcptfstate01dev
+#         backendAzureRmContainerName: tfstatetest
+#         backendAzureRmKey: pd-cp-webapp-q-azuw/terraform.tfstate
+#     # This item has no matching transformer
+#     - task: TerraformTaskV4@4
+#       inputs:
+#         provider: azurerm
+#         command: plan
+#         commandOptions: "-var-file=terraform_q_azuw.tfvars"
+#         environmentServiceNameAzureRM: Payment Dev SP
